@@ -1,6 +1,119 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-03T22:48:50.940Z",
-  "recipes": [],
+  "updatedAt": "2026-10-03T22:51:37.844Z",
+  "recipes": [
+    {
+      "id": "26e106fe-8382-42fd-9355-6f9ddac3f2f7",
+      "title": "Paratha (indyjski chlebek)",
+      "description": "Chrupiące i warstwowe indyjskie chlebki, które świetnie smakują z curry, gulaszem lub jako dodatek do śniadania.",
+      "servings": 8,
+      "prepMinutes": 40,
+      "cookMinutes": 20,
+      "totalMinutes": 60,
+      "tags": [
+        "wegetariańskie",
+        "chleb",
+        "indyjskie",
+        "śniadanie"
+      ],
+      "ingredients": [
+        {
+          "id": "1e638a46-77c4-4b5f-a318-ad7f57b45091",
+          "raw": "2½ cups (300 g) wheat flour",
+          "name": "mąka pszenna",
+          "quantity": 625,
+          "unit": "ml",
+          "note": "można użyć mąki pełnoziarnistej lub uniwersalnej"
+        },
+        {
+          "id": "d7dc9cf5-c47b-4491-b2c2-deda986ae38f",
+          "raw": "½ teaspoon salt",
+          "name": "sól",
+          "quantity": 2.5,
+          "unit": "ml",
+          "note": "opcjonalnie"
+        },
+        {
+          "id": "dd930d97-0152-4978-8102-edd20229bc16",
+          "raw": "2 tsps fine sugar",
+          "name": "cukier",
+          "quantity": 10,
+          "unit": "ml",
+          "note": "opcjonalnie"
+        },
+        {
+          "id": "adba21ad-362f-4f5b-80be-0df42b70445b",
+          "raw": "1 tablespoon neutral oil",
+          "name": "olej",
+          "quantity": 15,
+          "unit": "ml",
+          "note": "do ciasta"
+        },
+        {
+          "id": "eaf38314-9e92-4441-9f48-c2193b75732f",
+          "raw": "¾ to 1 cup (180 to 240 ml) warm water",
+          "name": "woda",
+          "quantity": 240,
+          "unit": "ml",
+          "note": "ciepła"
+        },
+        {
+          "id": "0772e4a8-0355-4dc0-b14f-cd77e8503dd3",
+          "raw": "3 to 4 tablespoons (45 ml) melted ghee or oil",
+          "name": "ghee",
+          "quantity": 45,
+          "unit": "ml",
+          "note": "roztopione, do warstwowania i smażenia"
+        },
+        {
+          "id": "de39f5a7-698f-4f45-b8b3-49bef7ae0634",
+          "raw": "¼ cup flour",
+          "name": "mąka pszenna",
+          "quantity": 62.5,
+          "unit": "ml",
+          "note": "do podsypywania"
+        }
+      ],
+      "steps": [
+        {
+          "id": "47f74744-305c-4982-96db-903681766e0e",
+          "text": "W misce wymieszaj mąkę, sól i olej. Stopniowo dolewaj wodę, wyrabiając miękkie, nieklejące się ciasto.",
+          "durationMinutes": 5
+        },
+        {
+          "id": "8504e83b-7066-4205-9909-31ec95309a6e",
+          "text": "Wyrabiaj ciasto, aż będzie miękkie i elastyczne. Posmaruj je odrobiną oleju, przykryj i odstaw do odpoczęcia.",
+          "durationMinutes": 40
+        },
+        {
+          "id": "dfb9633c-cb87-4e3a-92f9-c242040daf67",
+          "text": "Podziel ciasto na 8 porcji, uformuj kulki i trzymaj je pod przykryciem.",
+          "durationMinutes": 5
+        },
+        {
+          "id": "95931f8e-9eb9-47ac-93fb-bb31963622c7",
+          "text": "Rozwałkuj kulkę ciasta na placek, posmaruj odrobiną ghee, posyp szczyptą mąki i złóż w wybrany kształt (trójkąt, kwadrat lub zwiń w rulon i zwiń w ślimaka).",
+          "durationMinutes": 5
+        },
+        {
+          "id": "23da5839-6e77-4665-b196-6dbc58715d83",
+          "text": "Rozwałkuj ponownie złożone ciasto na placek o grubości odpowiedniej do smażenia.",
+          "durationMinutes": 5
+        },
+        {
+          "id": "26ec2b6a-a73d-49d6-ad98-1a6ac37f9178",
+          "text": "Rozgrzej patelnię na średnim ogniu. Smaż parathę, obracając ją i smarując ghee z obu stron, aż pojawią się brązowe plamki i chlebek napuchnie.",
+          "durationMinutes": 5
+        }
+      ],
+      "warnings": [
+        "Przepis został w pełni odczytany ze strony. Ilości zostały przeliczone na system metryczny zgodnie z instrukcją (1 szklanka = 250 ml, 1 łyżka = 15 ml, 1 łyżeczka = 5 ml)."
+      ],
+      "source": "https://www.indianhealthyrecipes.com/paratha-recipe-plain-paratha/",
+      "sourceType": "url",
+      "createdAt": "2026-10-03T22:51:33.841Z",
+      "updatedAt": "2026-10-03T22:51:33.841Z"
+    }
+  ],
   "shopping": []
 }
