@@ -82,11 +82,22 @@ const sandbox = {
     matchMedia: () => ({ matches: false }),
     scrollTo: noop,
     crypto: { randomUUID: nextUuid },
+    // Adres strony bez fragmentu: udostępnianie linkiem czyta location.hash przy starcie.
+    location: { href: "https://przepisnik.test/", hash: "" },
+    // nasłuchy poza DOM (pagehide) – w pustym piaskownicy tylko rejestrują się
+    addEventListener: noop,
   },
+  location: { href: "https://przepisnik.test/", hash: "" },
+  navigator: {},
   localStorage: store(),
   sessionStorage: store(),
   crypto: { randomUUID: nextUuid },
   fetch: () => Promise.reject(new Error("brak sieci w testach")),
+  // base64 dla pliku przepisów i dla linków z przepisem
+  btoa: (s) => Buffer.from(s, "binary").toString("base64"),
+  atob: (s) => Buffer.from(s, "base64").toString("binary"),
+  TextEncoder,
+  TextDecoder,
   console,
   setTimeout,
   clearTimeout,
@@ -696,6 +707,278 @@ test("brak sieci przy miniaturze nie wywraca aplikacji", async () => {
     throw new TypeError("Failed to fetch");
   };
   await assert.rejects(() => RB.callGeminiImage("rysunek"), /Nie udało się połączyć/);
+});
+
+console.log("\nplik przepisów na GitHubie");
+function ghJson(body, status = 200) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    text: async () => JSON.stringify(body),
+    json: async () => body,
+  };
+}
+function setGh(settings) {
+  Object.assign(STATE.settings, { ghRepo: "mnia/przepisnik", ghToken: "ghp_TEST", ghBranch: "", ...settings });
+}
+
+test("bez repo i tokenu nie odpalamy sieci", async () => {
+  STATE.settings.ghRepo = null;
+  STATE.settings.ghToken = "";
+  let called = false;
+  sandbox.fetch = async () => {
+    called = true;
+    return ghJson({});
+  };
+  await assert.rejects(() => RB.ghLoad(), /Uzupełnij repozytorium/);
+  await assert.rejects(() => RB.ghSave(), /Uzupełnij repozytorium/);
+  assert.equal(called, false);
+});
+test("zapis odczytuje sha pliku i wysyła je w treści żądania", async () => {
+  setGh();
+  STATE.recipes = [RB.normalizeRecipe({ title: "Placki", ingredients: [{ name: "ziemniaki", quantity: 3, unit: "szt" }] })];
+  const seen = [];
+  sandbox.fetch = async (url, options) => {
+    seen.push({ url, options });
+    if (!options.method) return ghJson({ sha: "abc123", content: Buffer.from('{"recipes":[]}').toString("base64") });
+    return ghJson({ content: { sha: "def456" } });
+  };
+  await RB.ghSave();
+
+  assert.equal(seen.length, 2, "najpierw sha, potem zapis");
+  assert.equal(seen[0].url, "https://api.github.com/repos/mnia/przepisnik/contents/przepisy.json?ref=main");
+  assert.equal(seen[0].options.headers.authorization, "Bearer ghp_TEST");
+  assert.equal(seen[1].options.method, "PUT");
+  const body = JSON.parse(seen[1].options.body);
+  assert.equal(body.sha, "abc123", "bez sha GitHub odrzuci zapis");
+  assert.equal(body.branch, "main");
+  assert.match(body.message, /Przepiśnik/);
+});
+test("pierwszy zapis tworzy plik – bez sha w treści", async () => {
+  setGh();
+  let put = null;
+  sandbox.fetch = async (url, options) => {
+    if (!options.method) return ghJson({ message: "Not Found" }, 404); // pliku jeszcze nie ma
+    put = JSON.parse(options.body);
+    return ghJson({ content: { sha: "new1" } });
+  };
+  await RB.ghSave();
+
+  assert.ok(put, "nie było żądania zapisu");
+  assert.equal(put.sha, undefined, "nowy plik nie może dostać sha");
+});
+test("własna gałąź trafia do zapytania", async () => {
+  setGh({ ghBranch: "moja-galaz" });
+  const seen = [];
+  sandbox.fetch = async (url, options) => {
+    seen.push({ url, options });
+    return options.method ? ghJson({ content: { sha: "x" } }) : ghJson({ sha: "s" });
+  };
+  await RB.ghSave();
+  // odczyt sha musi pytać o wskazaną gałąź; zapis niesie gałąź w treści żądania
+  assert.match(seen[0].url, /\?ref=moja-galaz$/);
+  assert.equal(JSON.parse(seen[1].options.body).branch, "moja-galaz");
+});
+test("wczytanie zamienia dane i pamięta sha", async () => {
+  setGh();
+  STATE.recipes = [];
+  STATE.shopping = [];
+  const payload = {
+    recipes: [{ title: "Naleśniki", ingredients: [{ name: "mąka", quantity: 200, unit: "g" }] }],
+    shopping: [{ name: "mąka", quantity: 200, unit: "g", fromRecipes: ["x"] }],
+  };
+  sandbox.fetch = async () =>
+    ghJson({ sha: "sha-1", content: Buffer.from(JSON.stringify(payload), "utf8").toString("base64") });
+
+  const count = await RB.ghLoad();
+
+  assert.equal(count, 1);
+  assert.equal(STATE.recipes.length, 1);
+  assert.equal(STATE.recipes[0].title, "Naleśniki");
+  assert.equal(STATE.shopping.length, 1, "lista zakupów nie wjechała");
+  assert.equal(STATE.ghFileSha, "sha-1");
+});
+test("plik z polskimi znakami wraca nietknięty (base64, nie latin1)", async () => {
+  setGh();
+  STATE.recipes = [];
+  const title = "Żurek z chrzanem – śmiała";
+  sandbox.fetch = async () =>
+    ghJson({ sha: "s", content: RB.toBase64(JSON.stringify({ recipes: [{ title }] })) });
+  await RB.ghLoad();
+  assert.equal(STATE.recipes[0].title, title);
+});
+test("zapis i odczyt to dla siebie odwrotnością", async () => {
+  setGh();
+  STATE.recipes = [RB.normalizeRecipe({ title: "Pierogi ruskie", tags: ["pierogi"], ingredients: [{ name: "mąka", quantity: 300, unit: "g" }], steps: [{ text: "Ugotuj.", durationMinutes: 8 }] })];
+  let written = "";
+  sandbox.fetch = async (url, options) => {
+    if (options.method) {
+      written = JSON.parse(options.body).content;
+      return ghJson({ content: { sha: "s" } });
+    }
+    return ghJson({ sha: "s", content: written });
+  };
+  await RB.ghSave();
+  STATE.recipes = [];
+  await RB.ghLoad();
+  assert.equal(STATE.recipes[0].title, "Pierogi ruskie");
+  assert.equal(STATE.recipes[0].steps[0].text, "Ugotuj.");
+  assert.equal(STATE.recipes[0].ingredients[0].quantity, 300);
+});
+test("wczytanie z repo nie planuje zapisu tego samego pliku z powrotem", async () => {
+  // inaczej każde otwarcie strony kończyłoby się pustym commitem w repo
+  setGh({ ghAutoSave: true });
+  STATE.recipes = [];
+  const planned = [];
+  const realTimeout = sandbox.setTimeout;
+  sandbox.setTimeout = (fn) => {
+    planned.push(fn);
+    return 1;
+  };
+  sandbox.fetch = async () =>
+    ghJson({ sha: "s", content: RB.toBase64(JSON.stringify({ updatedAt: new Date().toISOString(), recipes: [{ title: "Z repo" }] })) });
+
+  try {
+    await RB.ghLoad();
+  } finally {
+    sandbox.setTimeout = realTimeout;
+  }
+  assert.equal(STATE.recipes[0].title, "Z repo");
+  assert.equal(planned.length, 0, "wczytanie zaplanowało zapis z powrotem: " + planned.length);
+});
+test("zły token mówi o tokenie, a nie o bazie", async () => {
+  setGh();
+  sandbox.fetch = async () => ghJson({ message: "Bad credentials" }, 401);
+  await assert.rejects(() => RB.ghLoad(), /Token GitHuba jest nieprawidłowy/);
+});
+test("brak praw do repo mówi, czego brakuje w uprawnieniach", async () => {
+  setGh();
+  sandbox.fetch = async () => ghJson({ message: "Resource not accessible by personal access token" }, 403);
+  await assert.rejects(() => RB.ghSave(), /Contents: read and write/);
+});
+test("limit zapytań GitHuba jest rozpoznany", () => {
+  const err = RB.ghError(403, "API rate limit exceeded for user");
+  assert.match(err.message, /limit zapytań/);
+});
+test("brak repo mówi, że sprawdzić nazwę", async () => {
+  setGh();
+  sandbox.fetch = async () => ghJson({ message: "Not Found" }, 404);
+  await assert.rejects(() => RB.ghLoad(), /repozytorium/);
+});
+test("plik bez tablicy recipes jest odrzucony", async () => {
+  setGh();
+  sandbox.fetch = async () => ghJson({ sha: "s", content: RB.toBase64('{"cos":1}') });
+  await assert.rejects(() => RB.ghLoad(), /nie zawiera listy przepisów/);
+});
+test("dwa zapisy naraz nie nadpisują się nawzajem", async () => {
+  setGh();
+  let puts = 0;
+  sandbox.fetch = async (url, options) => {
+    if (options.method) {
+      puts++;
+      await new Promise((r) => setTimeout(r, 5));
+      return ghJson({ content: { sha: "s" } });
+    }
+    return ghJson({ sha: "s" });
+  };
+  const first = RB.ghSave();
+  await assert.rejects(() => RB.ghSave(), /już trwa/, "drugi zapis powinien zostać odparty");
+  await first;
+  assert.equal(puts, 1);
+});
+test("zapis nie leci klucza Gemini ani tokenu w treści pliku", async () => {
+  setGh();
+  STATE.apiKey = "AIzaTajny";
+  let put = "";
+  sandbox.fetch = async (url, options) => {
+    if (options.method) put = options.body;
+    return options.method ? ghJson({ content: { sha: "s" } }) : ghJson({ sha: "s" });
+  };
+  await RB.ghSave();
+  assert.ok(!put.includes("AIzaTajny"), "klucz Gemini w pliku przepisów");
+  assert.ok(!put.includes("ghp_TEST"), "token GitHuba w pliku przepisów");
+});
+test("zła nazwa repo wraca do null przy wczytywaniu ustawień", () => {
+  assert.equal(RB.normalizeSettings({ ghRepo: "zly-adres" }).ghRepo, null);
+  assert.equal(RB.normalizeSettings({ ghRepo: "  " }).ghRepo, null);
+  assert.equal(RB.normalizeSettings({ ghRepo: 42 }).ghRepo, null);
+  assert.equal(RB.normalizeSettings({ ghRepo: "mnia/przepisnik" }).ghRepo, "mnia/przepisnik");
+  assert.equal(RB.normalizeSettings({ ghRepo: "mnia/przepisnik", ghAutoSave: true }).ghAutoSave, true);
+  assert.equal(RB.normalizeSettings({}).ghAutoSave, false, "auto-zapis domyślnie wyłączony");
+});
+
+console.log("\nudostępnianie linkiem");
+const SHARED = {
+  title: "Naleśniki z sera",
+  description: "Szybki obiad",
+  servings: 4,
+  prepMinutes: 20,
+  cookMinutes: 15,
+  tags: ["szybkie", "wegetariańskie"],
+  ingredients: [
+    { name: "mąka pszenna", quantity: 200, unit: "g", note: "" },
+    { name: "twaróg", quantity: 150, unit: "g", note: "półturego" },
+  ],
+  steps: [{ text: "Zagnieść ciasto.", durationMinutes: 10 }],
+};
+
+test("przepis wraca z linku identyczny", () => {
+  const back = RB.recipeFromPayload(JSON.parse(JSON.stringify(RB.sharePayload(SHARED))));
+  assert.equal(back.title, "Naleśniki z sera");
+  assert.equal(back.servings, 4);
+  assert.equal(back.ingredients.length, 2);
+  assert.equal(back.ingredients[1].quantity, 150);
+  assert.equal(back.ingredients[1].note, "półturego");
+  assert.equal(back.steps[0].durationMinutes, 10);
+  assert.equal(back.totalMinutes, 35);
+});
+test("link z przepisem nie ma znaków psujących adres", () => {
+  const url = RB.shareUrl(RB.normalizeRecipe(SHARED));
+  assert.ok(url.startsWith("https://przepisnik.test/#przepis="));
+  assert.ok(!/[+/=]/.test(url.split("#przepis=")[1]), "w ładunku linku został znak + / lub =");
+  assert.ok(!url.includes(" "), "w linku jest spacja");
+});
+test("polskie znaki i emoji przeżywają link", () => {
+  const recipe = RB.normalizeRecipe({
+    title: "Żurek – śmiała, żeby wszystko było po polsku 🙂",
+    ingredients: [{ name: "chrzan", quantity: 1, unit: "łyżka", note: "świeży" }],
+  });
+  const back = RB.recipeFromHash("#przepis=" + RB.base64UrlEncode(JSON.stringify(RB.sharePayload(recipe))));
+  assert.equal(back.title, "Żurek – śmiała, żeby wszystko było po polsku 🙂");
+  assert.equal(back.ingredients[0].name, "chrzan");
+});
+test("zwykłe wejście na stronę nie robi przepisu", () => {
+  assert.equal(RB.recipeFromHash(""), null);
+  assert.equal(RB.recipeFromHash("#moj-anchor"), null);
+  assert.equal(RB.recipeFromHash("#przepis=to-nie-json"), null, "śmieci w linku nie mogą wywracać aplikacji");
+  assert.equal(RB.recipeFromHash("#przepis=" + RB.base64UrlEncode('{"t":""}')), null, "bez tytułu nie ma przepisu");
+});
+test("do linku nie wchodzą ostrzeżenia ani źródło", () => {
+  const recipe = RB.normalizeRecipe({
+    title: "Test",
+    warnings: ["płukanie"],
+    source: "https://przyklad.test",
+    sourceType: "url",
+  });
+  const payload = RB.sharePayload(recipe);
+  assert.equal(payload.t, "Test");
+  assert.equal(payload.w, undefined, " ostrzeżenia kuchenne nie w linku");
+  assert.equal(payload.u, undefined, "adres źródłowy nie w linku");
+});
+test("tekstowa wersja przepisu jest czytelna i kompletna", () => {
+  const recipe = RB.normalizeRecipe(SHARED);
+  const text = RB.recipeAsText(recipe, 1);
+  assert.match(text, /^Naleśniki z sera/);
+  assert.match(text, /Składniki:/);
+  assert.match(text, /- 200 g mąka pszenna/);
+  assert.match(text, /twaróg \(półturego\)/);
+  assert.match(text, /1\. Zagnieść ciasto\. \(10 min\)/);
+});
+test("tekstowa wersja respektuje przeliczone porcje", () => {
+  const recipe = RB.normalizeRecipe(SHARED);
+  const text = RB.recipeAsText(recipe, 2);
+  assert.match(text, /400 g mąka pszenna/);
+  assert.match(text, /300 g twaróg/);
 });
 
 console.log("\nwczytanie obcych danych");

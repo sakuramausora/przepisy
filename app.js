@@ -286,10 +286,183 @@
     }
   }
 
+  // ==================================================================
+  // 1b. Udostępnianie przepisu linkiem
+  // ==================================================================
+
+  // Przepis w linku, bez serwera i bez bazy: cała treść siedzi w części za znakiem #,
+  // więc nigdy nie wychodzi na serwer GitHub Pages. Link jest długi (2–4 kB), ale mieści się
+  // w każdym komunikatorze i w schowku.
+  var SHARE_KEY = "przepis=";
+
+  /** Wybiera tylko pola potrzebne do odtworzenia przepisu – nie wysyłamy historii ani tagów. */
+  function sharePayload(recipe) {
+    return {
+      t: recipe.title,
+      d: recipe.description || "",
+      s: recipe.servings,
+      p: recipe.prepMinutes || 0,
+      c: recipe.cookMinutes || 0,
+      g: (recipe.tags || []).slice(0, 3),
+      i: (recipe.ingredients || []).map(function (ing) {
+        return [ing.quantity || 0, ing.unit || "", ing.name, ing.note || ""];
+      }),
+      k: (recipe.steps || []).map(function (step) {
+        return [step.text, step.durationMinutes || 0];
+      }),
+    };
+  }
+
+  function recipeFromPayload(data) {
+    if (!data || typeof data !== "object") return null;
+    var title = String(data.t || "").trim();
+    if (!title) return null;
+    var ingredients = (Array.isArray(data.i) ? data.i : [])
+      .map(function (row) {
+        if (!Array.isArray(row)) return null;
+        return {
+          name: String(row[2] || "").trim(),
+          quantity: num(row[0]),
+          unit: normalizeUnit(row[1]),
+          note: String(row[3] || ""),
+        };
+      })
+      .filter(function (ing) {
+        return ing && ing.name;
+      });
+    var steps = (Array.isArray(data.k) ? data.k : [])
+      .map(function (row) {
+        if (!Array.isArray(row)) return null;
+        var text = String(row[0] || "").trim();
+        return text ? { text: text, durationMinutes: num(row[1]) } : null;
+      })
+      .filter(Boolean);
+    return {
+      id: uid(),
+      title: title,
+      description: String(data.d || ""),
+      servings: Math.max(1, Math.round(num(data.s)) || 4),
+      prepMinutes: num(data.p),
+      cookMinutes: num(data.c),
+      totalMinutes: num(data.p) + num(data.c),
+      tags: Array.isArray(data.g) ? data.g.map(String).filter(Boolean).slice(0, 3) : [],
+      ingredients: ingredients.map(function (ing) {
+        return Object.assign({ id: uid(), raw: ing.name }, ing);
+      }),
+      steps: steps.map(function (step) {
+        return Object.assign({ id: uid() }, step);
+      }),
+      warnings: [],
+      source: null,
+      sourceType: "link",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  /** Zamienia treść na base64 bez znaków, które psują link (/, +, =). */
+  function base64UrlEncode(text) {
+    return btoa(String.fromCharCode.apply(null, new TextEncoder().encode(text)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  }
+
+  function base64UrlDecode(text) {
+    var padded = String(text).replace(/-/g, "+").replace(/_/g, "/");
+    while (padded.length % 4) padded += "=";
+    var binary = atob(padded);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  function shareUrl(recipe) {
+    var base = location.href.split("#")[0];
+    return base + "#" + SHARE_KEY + base64UrlEncode(JSON.stringify(sharePayload(recipe)));
+  }
+
+  /** Wyciąga przepis z adresu – null, gdy to zwykłe wejście na stronę. */
+  function recipeFromHash(hash) {
+    var raw = String(hash || "");
+    var at = raw.indexOf(SHARE_KEY);
+    if (at === -1) return null;
+    try {
+      return recipeFromPayload(JSON.parse(base64UrlDecode(raw.slice(at + SHARE_KEY.length))));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Kopiowanie do schowka. Schowek bywa zablokowany (http, brak zgody, iOS w webview),
+   * więc zawsze mamy plan B: pole tekstowe do zaznaczenia ręcznie.
+   */
+  function copyText(text, okMessage) {
+    var fallback = function () {
+      flash("Nie mogę skopiować automatycznie – zaznacz tekst i skopiuj ręcznie.", "err");
+      var box = $("#shareLinkBox");
+      if (box) {
+        box.value = text;
+        box.focus();
+        box.select();
+      }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        flash(okMessage || "Skopiowano.", "ok");
+      }, fallback);
+      return;
+    }
+    fallback();
+  }
+
+  /** Kopiuje link i mówi wprost, gdy jest za długi dla komunikatora. */
+  function shareRecipe(recipe) {
+    if (!recipe) return;
+    var url = shareUrl(recipe);
+    if (url.length > 4000) {
+      flash(
+        "Link ma " + url.length + " znaków – niektóre komunikatory mogą go urwać. Użyj „Kopiuj tekstem”.",
+        ""
+      );
+      return;
+    }
+    copyText(url, "Link skopiowany.");
+  }
+
+  /** Czytelna wersja przepisu – na wypadek, gdyby link nie przeszedł. */
+  function recipeAsText(recipe, factor) {
+    var lines = [recipe.title];
+    if (recipe.description) lines.push(recipe.description);
+    var parts = [];
+    if (recipe.prepMinutes) parts.push("przygotowanie " + fmtDuration(recipe.prepMinutes));
+    if (recipe.cookMinutes) parts.push("gotowanie " + fmtDuration(recipe.cookMinutes));
+    lines.push(
+      (recipe.servings ? " porcje: " + fmtQty(factor || 1, "") + " x " + recipe.servings : "").trim() +
+        (parts.length ? " (" + parts.join(", ") + ")" : "")
+    );
+    lines.push("");
+    lines.push("Składniki:");
+    (recipe.ingredients || []).forEach(function (ing) {
+      var qty = fmtQty((ing.quantity || 0) * (factor || 1), ing.unit);
+      lines.push("- " + [qty, ing.unit, ing.name, ing.note ? "(" + ing.note + ")" : ""].filter(Boolean).join(" "));
+    });
+    if ((recipe.steps || []).length) {
+      lines.push("");
+      lines.push("Przygotowanie:");
+      recipe.steps.forEach(function (step, index) {
+        lines.push(index + 1 + ". " + step.text + (step.durationMinutes ? " (" + fmtDuration(step.durationMinutes) + ")" : ""));
+      });
+    }
+    return lines.join("\n");
+  }
+
   var SOURCE_LABEL = {
     image: "ze zdjęcia",
     url: "z linku",
     text: "z tekstu",
+    link: "z linku",
     manual: "ręcznie",
   };
 
@@ -826,7 +999,10 @@
   var LS_SHOPPING = "recipe-bro.shopping";
   var LS_SETTINGS = "recipe-bro.settings";
   var LS_KEY = "recipe-bro.key"; // klucz tylko na czas sesji
+  var LS_GH_TOKEN = "recipe-bro.gh-token"; // token GitHuba, jak wyżej
   var DRAFT_KEY = "recipe-bro.draft";
+  var GH_FILE = "przepisy.json";
+  var GH_BRANCH = "main";
 
   var DEFAULTS = {
     model: "gemini-3.5-flash",
@@ -834,6 +1010,13 @@
     rememberKey: true,
     illustrations: true,
     illustrationsBlocked: false,
+    // dane w pliku przepisy.json (null = brak własnego pliku)
+    ghRepo: null,
+    ghToken: "",
+    ghRemember: false,
+    ghAutoLoad: false,
+    ghBranch: "",
+    ghAutoSave: false,
   };
 
   function load(key, fallback) {
@@ -933,6 +1116,12 @@
   function normalizeSettings(raw) {
     var merged = Object.assign({}, DEFAULTS, raw);
     if (RETIRED_MODELS.indexOf(merged.model) !== -1) merged.model = DEFAULTS.model;
+    if (merged.ghRepo && !/^[\w.-]+\/[\w.-]+$/.test(String(merged.ghRepo))) merged.ghRepo = null;
+    merged.ghToken = String(merged.ghToken || "");
+    merged.ghBranch = String(merged.ghBranch || "");
+    merged.ghAutoLoad = !!merged.ghAutoLoad;
+    merged.ghAutoSave = !!merged.ghAutoSave;
+    merged.ghRemember = !!merged.ghRemember;
     return merged;
   }
 
@@ -957,22 +1146,34 @@
     excluded: {},
     servings: null,
     addedNote: false,
+    ghFileSha: null,
+    ghBusy: false,
+    ghStatus: "",
+    ghError: "",
+    ghStale: false,
+    ghLoading: false,
   };
 
   function persistRecipes() {
     if (!save(LS_RECIPES, state.recipes)) {
       flash("Nie udało się zapisać – pamięć przeglądarki jest pełna.", "err");
     }
+    scheduleGhSave();
   }
 
   function persistShopping() {
     if (!save(LS_SHOPPING, state.shopping)) {
       flash("Nie udało się zapisać listy zakupów – pamięć przeglądarki jest pełna.", "err");
     }
+    scheduleGhSave();
   }
 
   function persistSettings() {
-    save(LS_SETTINGS, state.settings);
+    // Token GitHuba nigdy nie ląduje w settings – tak jak klucz Gemini. settings
+    // wędruje do eksportu i do localStorage, więc sekret musi mieć własne miejsce.
+    var plain = Object.assign({}, state.settings);
+    delete plain.ghToken;
+    save(LS_SETTINGS, plain);
     try {
       if (state.settings.rememberKey) {
         localStorage.setItem(LS_KEY, state.apiKey);
@@ -981,9 +1182,27 @@
         localStorage.removeItem(LS_KEY);
         sessionStorage.setItem(LS_KEY, state.apiKey);
       }
+      // Token trzymamy tak samo jak klucz Gemini: poza localStorage, gdy user nie zaznaczył.
+      if (state.settings.ghRemember) {
+        localStorage.setItem(LS_GH_TOKEN, state.settings.ghToken);
+        sessionStorage.removeItem(LS_GH_TOKEN);
+      } else {
+        localStorage.removeItem(LS_GH_TOKEN);
+        sessionStorage.setItem(LS_GH_TOKEN, state.settings.ghToken);
+      }
     } catch (e) {
       /* pamięć niedostępna */
     }
+  }
+
+  function loadGhToken() {
+    var stored = "";
+    try {
+      stored = localStorage.getItem(LS_GH_TOKEN) || sessionStorage.getItem(LS_GH_TOKEN) || "";
+    } catch (e) {
+      stored = "";
+    }
+    state.settings.ghToken = String(stored || "").trim();
   }
 
   function loadKey() {
@@ -1207,6 +1426,302 @@
       $("#imageHint").value = "";
       $("#cameraRow").hidden = !isTouch();
     }
+  }
+
+  // ==================================================================
+  // 12. Synchronizacja z repozytorium GitHub
+  // ==================================================================
+
+  var GH_API = "https://api.github.com";
+
+  /** Adres API dla pliku w repo – ta sama ścieżka dla odczytu i zapisu. */
+  function ghFileUrl() {
+    return GH_API + "/repos/" + state.settings.ghRepo + "/contents/" + GH_FILE;
+  }
+
+  function ghBranchQuery() {
+    return "?ref=" + encodeURIComponent(state.settings.ghBranch || GH_BRANCH);
+  }
+
+  /** Zamienia treść na base64, którego GitHub oczekuje w treści żądania. */
+  function toBase64(text) {
+    var bytes = new TextEncoder().encode(text);
+    var binary = "";
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+
+  function fromBase64(text) {
+    var binary = atob(String(text).replace(/\s/g, ""));
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  /** Uproszczone błędy – surowe odpowiedzi GitHuba są nieczytelne dla kucharki. */
+  function ghError(status, detail) {
+    var text = String(detail || "");
+    if (status === 401) return geminiError("Token GitHuba jest nieprawidłowy lub wygasł.", 401);
+    if (status === 403) {
+      if (/rate limit/i.test(text)) return geminiError("Przekroczony limit zapytań do GitHuba. Spróbuj za chwilę.", 403);
+      return geminiError("Brak uprawnień do tego repozytorium. Token potrzebuje prawa „Contents: read and write”.", 403);
+    }
+    if (status === 404) {
+      return geminiError("Nie ma takiego repozytorium albo pliku " + GH_FILE + ". Sprawdź nazwę repo i gałąź.", 404);
+    }
+    if (status === 409 || status === 422) {
+      return geminiError("Plik zmienił się w międzyczasie. Spróbuj zapisać ponownie.", status);
+    }
+    return geminiError("GitHub zwrócił błąd " + status + (text ? ": " + text.slice(0, 200) : ""), status);
+  }
+
+  function ghHeaders() {
+    return {
+      accept: "application/vnd.github+json",
+      authorization: "Bearer " + state.settings.ghToken,
+      "x-github-api-version": "2022-11-28",
+    };
+  }
+
+  function ghReady() {
+    return !!(state.settings.ghRepo && state.settings.ghToken);
+  }
+
+  /** Wczytuje plik z repozytorium do pamięci przeglądarki. */
+  function ghLoad(options) {
+    options = options || {};
+    if (!ghReady()) return Promise.reject(geminiError("Uzupełnij repozytorium i token w Ustawieniach.", 400));
+    return fetch(ghFileUrl() + ghBranchQuery(), { headers: ghHeaders() })
+      .then(function (response) {
+        return response.text().then(function (body) {
+          if (!response.ok) {
+            var detail = "";
+            try {
+              detail = JSON.parse(body).message || "";
+            } catch (e) {
+              detail = "";
+            }
+            throw ghError(response.status, detail);
+          }
+          var json = JSON.parse(body);
+          var text = fromBase64(json.content || "");
+          state.ghFileSha = json.sha || null;
+          return JSON.parse(text);
+        });
+      })
+      .then(function (data) {
+        if (!data || !Array.isArray(data.recipes)) {
+          throw geminiError("Plik " + GH_FILE + " nie zawiera listy przepisów – wygląda na uszkodzony.", 200);
+        }
+        var remoteStamp = Date.parse(data.updatedAt || "") || 0;
+        var localStamp = newestLocalStamp();
+        // Przepis mógł zostać poprawiony na telefonie, a na komputerze wciąż jest
+        // stara kopia z repo. Bez tego sprawdzenia auto-wczytanie cofałoby zmiany.
+        if (options.whenNewer && state.recipes.length && remoteStamp && remoteStamp < localStamp) {
+          state.ghStatus = "W pamięci są nowsze przepisy niż w repo – zostawiam te z tego urządzenia.";
+          state.ghError = "";
+          state.ghStale = true;
+          return state.recipes.length;
+        }
+        state.ghStale = false;
+        // Czytać z repo i od razu zapisywać z powrotem nie ma sensu – powstałby
+        // pusty commit przy każdym otwarciu strony. Dlatego na czas podmiany
+        // danych automatyczny zapis jest wyłączony.
+        state.ghLoading = true;
+        state.recipes = normalizeList(data.recipes, normalizeRecipe);
+        state.shopping = normalizeList(data.shopping, normalizeShopping);
+        persistRecipes();
+        persistShopping();
+        state.ghLoading = false;
+        state.ghStatus = "Wczytano z GitHuba: " + state.recipes.length + " przepisów.";
+        state.ghError = "";
+        return state.recipes.length;
+      });
+  }
+
+  /** Najnowsza data zmiany przepisu w pamięci przeglądarki – porównujemy ją z plikiem. */
+  function newestLocalStamp() {
+    var newest = 0;
+    state.recipes.forEach(function (recipe) {
+      var time = Date.parse(recipe.updatedAt || recipe.createdAt || "");
+      if (time > newest) newest = time;
+    });
+    return newest;
+  }
+
+  /**
+   * Zapisuje plik. Przy pierwszym zapisie bez znajomego sha GitHub wymaga flagi,
+   * więc najpierw sprawdzamy, czy plik już istnieje – inaczej dostalibyśmy błąd 422.
+   */
+  function ghSave(options) {
+    options = options || {};
+    if (!ghReady()) return Promise.reject(geminiError("Uzupełnij repozytorium i token w Ustawieniach.", 400));
+    if (state.ghBusy) {
+      state.ghStatus = "Zapis się odbywa…";
+      return Promise.reject(geminiError("Zapis do GitHuba już trwa.", 409));
+    }
+    state.ghBusy = true;
+    renderGhState();
+    var payload = JSON.stringify(
+      { version: 1, updatedAt: new Date().toISOString(), recipes: state.recipes, shopping: state.shopping },
+      null,
+      2
+    );
+    var token = state.settings.ghToken;
+    var branch = state.settings.ghBranch || GH_BRANCH;
+    var fileUrl = ghFileUrl();
+
+    function fetchSha() {
+      return fetch(fileUrl + ghBranchQuery(), { headers: ghHeaders() }).then(function (response) {
+        if (response.status === 404) return null; // pliku jeszcze nie ma – PUT bez sha
+        if (!response.ok) {
+          return response.text().then(function (body) {
+            var detail = "";
+            try {
+              detail = JSON.parse(body).message || "";
+            } catch (e) {
+              detail = "";
+            }
+            throw ghError(response.status, detail);
+          });
+        }
+        return response.json().then(function (json) {
+          return json.sha || null;
+        });
+      });
+    }
+
+    return fetchSha()
+      .then(function (sha) {
+        var body = {
+          message: options.message || "Przepiśnik: zapis przepisów",
+          content: toBase64(payload),
+          branch: branch,
+        };
+        if (sha) body.sha = sha;
+        var raw = JSON.stringify(body);
+        // keepalive pozwala dociągnąć zapis w trakcie zamykania karty, ale przeglądarki
+        // odrzucają żądania powyżej 64 kB – wtedy zwykły zapis wystarczy.
+        var init = {
+          method: "PUT",
+          headers: Object.assign(ghHeaders(), { "content-type": "application/json" }),
+          body: raw,
+        };
+        if (options.keepalive && raw.length < 60000) init.keepalive = true;
+        return fetch(fileUrl, init).then(function (response) {
+          return response.text().then(function (text) {
+            if (!response.ok) {
+              var detail = "";
+              try {
+                detail = JSON.parse(text).message || "";
+              } catch (e) {
+                detail = "";
+              }
+              throw ghError(response.status, detail);
+            }
+            var json = JSON.parse(text);
+            state.ghFileSha = (json.content && json.content.sha) || state.ghFileSha;
+            state.ghStatus = "Zapisano na GitHubie (" + state.recipes.length + " przepisów).";
+            state.ghError = "";
+            return true;
+          });
+        });
+      })
+      .catch(function (error) {
+        state.ghError = (error && error.message) || "Nie udało się zapisać na GitHubie.";
+        state.ghStatus = "";
+        throw error;
+      })
+      .finally(function () {
+        state.ghBusy = false;
+        renderGhState();
+      });
+  }
+
+  // Auto-zapis: kilka zmian pod rząd (np. dodawanie składników do zakupów) to jedna
+  // aktualizacja pliku. 4 s to wygodny kompromis: rzadko wygrywa z użytkownikiem,
+  // a po zamknięciu karty i tak zdążymy dopytać GitHuba.
+  var ghSaveTimer = null;
+  var ghSaveDelay = 4000;
+
+  /** Wyłącznie dla testów – skraca odstęp, żeby nie czekać 4 s na debounce. */
+  function setGhSaveDelay(ms) {
+    ghSaveDelay = Math.max(0, Math.round(Number(ms) || 0));
+  }
+
+  function scheduleGhSave() {
+    // podczas wczytywania z repo zapis byłby zapętleniem: plik właśnie przyszedł
+    if (state.ghLoading) return;
+    if (!state.settings.ghAutoSave || !ghReady()) return;
+    clearTimeout(ghSaveTimer);
+    ghSaveTimer = setTimeout(function () {
+      ghSaveTimer = null;
+      ghSave({ message: "Przepiśnik: zapis przepisów" }).catch(function () {
+        renderGhState();
+      });
+    }, ghSaveDelay);
+  }
+
+  /**
+   * Zamykasz kartę w trakcie oczekiwania na debounce – zapisujemy od razu.
+   * Bez tego ostatnia zmiana zostałaby tylko w pamięci telefonu, a przy
+   * następnym otwarciu auto-wczytanie nadpisałoby ją starą wersją z repo.
+   */
+  function flushGhSave() {
+    if (!ghSaveTimer || !state.settings.ghAutoSave || !ghReady()) return;
+    clearTimeout(ghSaveTimer);
+    ghSaveTimer = null;
+    ghSave({ message: "Przepiśnik: zapis przepisów", keepalive: true }).catch(function () {
+      /* karta się zamyka – nie ma miejsca na komunikat */
+    });
+  }
+
+  /**
+   * Na starcie: jeśli włączone auto-wczytywanie, pytamy GitHuba o plik.
+   * Tryb „gdy różni się” nie kasuje lokalnych danych bez potwierdzenia –
+   * inaczej pierwsze uruchomienie po podłączeniu skasowałoby przepisy w telefonie.
+   */
+  function ghAutoLoad() {
+    if (!state.settings.ghAutoLoad || !ghReady()) return Promise.resolve();
+    return ghLoad({ whenNewer: true })
+      .then(function () {
+        render();
+        // plik w repo był starszy niż pamięć – wypychamy nowsze dane, jeśli wolno
+        if (state.ghStale) {
+          if (state.settings.ghAutoSave) {
+            ghSave({ message: "Przepiśnik: nowsze przepisy z tego urządzenia" }).catch(function () {
+              renderGhState();
+            });
+          } else {
+            state.ghStatus += " Włącz „Zapisuj automatycznie”, żeby wróciły do repo.";
+            renderGhState();
+          }
+        }
+      })
+      .catch(function (error) {
+        state.ghError = (error && error.message) || "Nie udało się wczytać z GitHuba.";
+        state.ghStatus = "";
+        renderGhState();
+      });
+  }
+
+  // Uwaga: ta funkcja wołana jest z wewnątrz ghSave(), więc nie może wywoływać
+  // renderSettings() – zapętliłoby renderowanie przy każdym zapisie.
+  function renderGhState() {
+    var box = $("#ghState");
+    if (box) {
+      var parts = [];
+      if (state.ghBusy) parts.push("Pracuję…");
+      if (state.ghStatus) parts.push(esc(state.ghStatus));
+      if (state.ghError) parts.push('<span class="warn-text">' + esc(state.ghError) + "</span>");
+      box.innerHTML = parts.length ? '<p class="tiny muted">' + parts.join("<br>") + "</p>" : "";
+    }
+    ["#btnGhLoad", "#btnGhSave"].forEach(function (sel) {
+      var btn = $(sel);
+      // Przyciski gasimy tylko w trakcie pracy, nie na stałe – brak tokenu
+      // obsługuje czytelny komunikat, a nie milcząco zgaszone przyciski.
+      if (btn) btn.disabled = state.ghBusy;
+    });
   }
 
   async function runParse() {
@@ -1697,9 +2212,11 @@
       '<label class="field" style="margin:0;width:96px"><span>Porcje</span><input type="number" min="1" max="50" id="detailServings" value="' + esc(servings) + '"></label>' +
       (factor !== 1 ? '<span class="small muted">×' + (Math.round(factor * 100) / 100) + " oryginalne</span>" : "") +
       '<div class="spacer"></div>' +
+      '<button class="btn ghost sm" type="button" id="btnShareRecipe">Udostępnij</button>' +
       '<button class="btn ghost sm" type="button" id="btnEditRecipe">Edytuj</button>' +
       '<button class="btn danger sm" type="button" id="btnDeleteRecipe">Usuń</button>' +
-      "</div></div>";
+      "</div></div>" +
+      '<div class="card" id="shareBox"></div>';
 
     var ingHtml = recipe.ingredients
       .map(function (ing) {
@@ -1767,10 +2284,48 @@
       '<p class="tiny muted">Dodano ' + esc(formatDate(recipe.createdAt)) +
       (recipe.updatedAt !== recipe.createdAt ? " · edycja " + esc(formatDate(recipe.updatedAt)) : "") +
       "</p>";
+    renderShareBox();
   }
 
   /**
-   * Usuwa przepis i sprząta listę zakupów: znikają pozycje, które pochodziły wyłącznie
+   * Karta „Udostępnij": link (przepis w adresie) i tekst do wklejenia.
+   * Osobny kontener, bo renderDetail() podmienia sobie #detailBody w całości.
+   */
+  function renderShareBox() {
+    var box = $("#shareBox");
+    var recipe = recipeById(state.detailId);
+    if (!box || !recipe) return;
+    var servings = state.servings || recipe.servings;
+    var factor = servings / Math.max(1, recipe.servings);
+    box.innerHTML =
+      "<h2>Udostępnij</h2>" +
+      '<p class="small muted">Link zawiera cały przepis – otworzy go ktokolwiek, w przeglądarce, ' +
+      "bez logowania i bez serwera po Twojej stronie.</p>" +
+      '<div class="row">' +
+      '<button class="btn ghost sm" type="button" id="btnCopyLink">Kopiuj link</button>' +
+      '<button class="btn ghost sm" type="button" id="btnCopyText">Kopiuj tekstem</button>' +
+      "</div>" +
+      '<label class="field mt"><span>Link</span>' +
+      '<textarea id="shareLinkBox" rows="2" readonly class="mono"></textarea></label>' +
+      '<p class="tiny muted" id="shareNote"></p>';
+    var url = shareUrl(recipe);
+    var linkBox = $("#shareLinkBox");
+    linkBox.value = url;
+    var note =
+      "Długość linku: " + url.length + " znaków." +
+      (url.length > 4000
+        ? " Przy takiej długości lepiej wyślij tekstem – nie każdy komunikator przeniesie długi link."
+        : " Wyślij go w komunikatorze albo e-mailem.");
+    // Otwarta z dysku strona nie ma adresu w internecie – link zadziała tylko
+    // tam, gdzie aplikacja jest opublikowana.
+    if (location.protocol !== "http:" && location.protocol !== "https:") {
+      note +=
+        " Ten link zadziała dopiero po opublikowaniu strony (np. na GitHub Pages) – pliku otwartego z dysku nie da się udostępnić.";
+    }
+    $("#shareNote").textContent = note;
+  }
+
+  /** Usuwa przepis i sprząta listę zakupów: znikają pozycje, które pochodziły wyłącznie
    * z niego, a wspólne z innymi przepisami zostają.
    */
   function deleteRecipe(id) {
@@ -1891,8 +2446,15 @@
     $("#modelInput").value = state.settings.model;
     $("#servingsInput").value = state.settings.shoppingServings;
     $("#illustrationsInput").checked = state.settings.illustrations !== false;
+    $("#ghRepoInput").value = state.settings.ghRepo || "";
+    $("#ghBranchInput").value = state.settings.ghBranch || "";
+    $("#ghTokenInput").value = state.settings.ghToken;
+    $("#ghRemember").checked = !!state.settings.ghRemember;
+    $("#ghAutoLoad").checked = !!state.settings.ghAutoLoad;
+    $("#ghAutoSave").checked = !!state.settings.ghAutoSave;
     renderImageState();
     renderKeyStatus();
+    renderGhState();
   }
 
   /** Jedno zdanie o miniaturkach: włączone, wyłączone albo zablokowane przez limit planu. */
@@ -2054,6 +2616,13 @@
         }
       }
     });
+
+    // Zamykanie karty: dociągamy zapis na GitHubie, zamiast czekać debounce.
+    // Na telefonie to najczęstszy sposób zakończenia pracy z aplikacją.
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") flushGhSave();
+    });
+    window.addEventListener("pagehide", flushGhSave);
 
     // import: tekst
     $("#textInput").addEventListener("keydown", function (e) {
@@ -2233,6 +2802,28 @@
       }
       if (e.target.closest("#btnGoShopping")) {
         show("shopping");
+        return;
+      }
+      if (e.target.closest("#btnShareRecipe")) {
+        renderShareBox();
+        var box = $("#shareBox");
+        // scrollIntoView nie istnieje w niektórych przeglądarkach dla elementów
+        // spoza dokumentu – bez sprawdzenia kliknięcie „Udostępnij” wywalałoby kartę.
+        if (box && typeof box.scrollIntoView === "function") {
+          box.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return;
+      }
+      if (e.target.closest("#btnCopyLink")) {
+        shareRecipe(recipeById(state.detailId));
+        return;
+      }
+      if (e.target.closest("#btnCopyText")) {
+        var r = recipeById(state.detailId);
+        if (!r) return;
+        var text = recipeAsText(r, (state.servings || r.servings) / Math.max(1, r.servings));
+        copyText(text, "Przepis skopiowany jako tekst.");
+        return;
       }
     });
     $("#detailBody").addEventListener("change", function (e) {
@@ -2345,6 +2936,69 @@
       persistSettings();
       renderSettings();
     });
+    // GitHub: przepisy w pliku przepisy.json
+    function ghSettingFromInputs() {
+      var repo = String($("#ghRepoInput").value || "").trim().replace(/^https?:\/\/github\.com\//i, "");
+      repo = repo.replace(/\.git$/i, "").replace(/^\/+|\/+$/g, "");
+      if (repo && !/^[\w.-]+\/[\w.-]+$/.test(repo)) {
+        flash("Nazwa repo ma wyglądać tak: twoj-user/przepisnik", "err", "#ghState");
+        return null;
+      }
+      state.settings.ghRepo = repo || null;
+      state.settings.ghBranch = String($("#ghBranchInput").value || "").trim();
+      state.settings.ghToken = String($("#ghTokenInput").value || "").trim();
+      state.settings.ghRemember = $("#ghRemember").checked;
+      state.settings.ghAutoLoad = $("#ghAutoLoad").checked;
+      state.settings.ghAutoSave = $("#ghAutoSave").checked;
+      persistSettings();
+      return state.settings.ghRepo;
+    }
+
+    ["#ghRepoInput", "#ghBranchInput", "#ghTokenInput"].forEach(function (sel) {
+      $(sel).addEventListener("change", function () {
+        ghSettingFromInputs();
+        renderGhState();
+      });
+    });
+    ["#ghRemember", "#ghAutoLoad", "#ghAutoSave"].forEach(function (sel) {
+      $(sel).addEventListener("change", function () {
+        ghSettingFromInputs();
+        renderGhState();
+      });
+    });
+    $("#btnGhLoad").addEventListener("click", function () {
+      if (!ghSettingFromInputs()) return;
+      var localCount = state.recipes.length;
+      var ask = function () {
+        ghLoad()
+          .then(function () {
+            render();
+            flash("Wczytano z GitHuba.", "ok", "#settingsNotice");
+          })
+          .catch(function (error) {
+            renderGhState();
+            flash(error.message, "err", "#settingsNotice");
+          });
+      };
+      // Przycisk „Wczytaj" nadpisuje to, co jest w pamięci – pytamy, jeśli coś tam jest.
+      if (localCount && !window.confirm("Zamienić " + localCount + " przepisów z pamięci na te z GitHuba?")) {
+        return;
+      }
+      ask();
+    });
+    $("#btnGhSave").addEventListener("click", function () {
+      if (!ghSettingFromInputs()) return;
+      ghSave({ message: "Przepiśnik: zapis przepisów" })
+        .then(function () {
+          renderGhState();
+          flash("Zapisano na GitHubie.", "ok", "#settingsNotice");
+        })
+        .catch(function (error) {
+          renderGhState();
+          flash(error.message, "err", "#settingsNotice");
+        });
+    });
+
     $("#btnRetryImage").addEventListener("click", function () {
       state.settings.illustrationsBlocked = false;
       persistSettings();
@@ -2392,10 +3046,28 @@
 
   function init() {
     loadKey();
+    loadGhToken();
     restoreDraft();
     wire();
     setImportTab("image");
+    if (openSharedRecipe()) return; // link z przepisem ma pierwszeństwo
     show(state.draft ? "editor" : "import");
+    ghAutoLoad();
+  }
+
+  /**
+   * Otwarcie linku z przepisem: wkleja go do edytora jako nowy szkic, żeby można było
+   * przejrzeć i zapisać. Zwykłe wejście na stronę (bez #przepis=…) robi nic.
+   */
+  function openSharedRecipe() {
+    var recipe = recipeFromHash(window.location.hash);
+    if (!recipe) return false;
+    state.draft = recipe;
+    state.draftIsNew = true;
+    persistDraft();
+    show("editor");
+    flash("Ktoś podzielił się z Tobą przepisem. Popraw i zapisz.", "ok");
+    return true;
   }
 
   // Mały eksport do testów (node --check + smoke testy).
@@ -2420,6 +3092,26 @@
     normalizeSettings: normalizeSettings,
     RETIRED_MODELS: RETIRED_MODELS,
     DEFAULTS: DEFAULTS,
+    // GitHub
+    ghSave: ghSave,
+    ghLoad: ghLoad,
+    ghReady: ghReady,
+    ghFileUrl: ghFileUrl,
+    ghBranchQuery: ghBranchQuery,
+    ghError: ghError,
+    setGhSaveDelay: setGhSaveDelay,
+    flushGhSave: flushGhSave,
+    newestLocalStamp: newestLocalStamp,
+    toBase64: toBase64,
+    fromBase64: fromBase64,
+    // udostępnianie
+    shareUrl: shareUrl,
+    sharePayload: sharePayload,
+    recipeFromPayload: recipeFromPayload,
+    recipeFromHash: recipeFromHash,
+    recipeAsText: recipeAsText,
+    base64UrlEncode: base64UrlEncode,
+    base64UrlDecode: base64UrlDecode,
     cleanDraft: cleanDraft,
     buildRequest: buildRequest,
     callGemini: callGemini,

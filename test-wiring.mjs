@@ -77,11 +77,15 @@ check("app.js nie odwołuje się do elementów spoza sekcji", () => {
   // wszystkie #id z app.js muszą być albo w HTML, albo tworzone dynamicznie przez show()
   assert.ok(!/document\.body\.innerHTML/.test(js), "podmienia całe body");
 });
-check("wszystkie wywołania fetch idą do generativelanguage", () => {
+check("wszystkie wywołania fetch idą tylko do Gemini albo GitHuba", () => {
   const urls = [...js.matchAll(/fetch\(\s*([^,)]+)/g)].map((m) => m[1].trim());
   assert.ok(urls.length > 0, "brak fetch");
   for (const u of urls) {
-    assert.ok(/API_ROOT/.test(u), "fetch na adres spoza API_ROOT: " + u);
+    // API_ROOT = Gemini, ghFileUrl() = api.github.com. Nic innego nie ma prawa
+    // odpytywać sieci – ani własnej domeny, ani analityki.
+    // NB: regex wycina wyrażenie na pierwszym ")", więc "ghFileUrl(" łamie wzorzec
+    // z nawiasem – dopuszczamy obie postacie.
+    assert.ok(/API_ROOT|ghFileUrl\(|fileUrl/.test(u), "fetch na adres spoza Gemini/GitHuba: " + u);
   }
 });
 check("klucz API nigdzie nie trafia do URL", () => {
@@ -162,7 +166,55 @@ check("miniaturki mają komplet elementów", () => {
   // ikona zastępowana rysunkiem musi być w tym samym miejscu co placeholder
   assert.ok(/state\.illustration[\s\S]{0,200}class="art"/.test(js), "rysunek nie wchodzi w #dropInner");
 });
-check("nazwa strony jest spójna w title, na pasku i w metatadze telefonu", () => {
+check("GitHub: każde zapytanie idzie przez API i nagłówek autoryzacji", () => {
+  // regresja: token w query stringu trafiłby do logów GitHuba i do historii przeglądarki
+  assert.ok(js.includes('"https://api.github.com"'), "brak stałego adresu API GitHuba");
+  assert.ok(/authorization:\s*"Bearer /.test(js), "token nie leci w nagłówku authorization");
+  assert.ok(!/token=\$\{/.test(js), "token w query stringu");
+  for (const id of ["ghRepoInput", "ghBranchInput", "ghTokenInput", "ghAutoLoad", "ghAutoSave", "ghRemember", "btnGhLoad", "btnGhSave", "ghState"]) {
+    assert.ok(htmlIds.has(id), "brak #" + id);
+  }
+  assert.ok(html.includes("przepisy.json"), "nie wiadomo, w jakim pliku trzymamy przepisy");
+  assert.ok(js.includes('GH_FILE = "przepisy.json"'), "plik w kodzie i w opisie się różnią");
+  // zapis po zmianie musi być odpalany – inaczej sync nigdy nie ruszy
+  assert.ok(/function persistRecipes\(\)[\s\S]{0,400}scheduleGhSave\(\)/.test(js), "zapis przepisów nie puszcza zapisu na GitHubie");
+  assert.ok(/function persistShopping\(\)[\s\S]{0,400}scheduleGhSave\(\)/.test(js), "zapis zakupów nie puszcza zapisu na GitHuba");
+});
+check("plik przepisów nie zawiera klucza ani tokenu", () => {
+  // ghSave buduje ładunek wprost z przepisów i zakupów; gdyby dorzucił state,
+  // sekret trafiłby do repozytorium. Sprawdzamy pole po polu, nie cały plik –
+  // nazwa "ghToken" musi przecież występować w kodzie.
+  const body = js.match(/var payload = JSON\.stringify\(([\s\S]*?)\n\s*\);/);
+  assert.ok(body, "nie znaleziono ładunku pliku przepisów");
+  const payload = body[1];
+  for (const key of ["version", "updatedAt", "recipes", "shopping"]) {
+    assert.ok(payload.includes(key), "brak pola " + key + " w pliku przepisów");
+  }
+  for (const forbidden of ["apiKey", "ghToken", "settings", "LS_", "localStorage"]) {
+    assert.ok(!payload.includes(forbidden), "ładunek zawiera " + forbidden + " – sekret trafiłby do repo");
+  }
+});
+check("link do udostępnienia nie wysyła przepisu na serwer strony", () => {
+  assert.ok(/location\.href\.split\("#"\)\[0\]/.test(js), "link nie bierze adresu strony");
+  assert.ok(js.includes('"#" + SHARE_KEY +'), "przepis nie siedzi w części za znakiem #");
+  // jedyne adresy w sieci to Gemini i GitHub – nigdy własna domena
+  const urls = [...js.matchAll(/https?:\/\/[^\s"'`)]+/g)].map((m) => m[0]);
+  const allowed = [/generativelanguage\.googleapis\.com/, /api\.github\.com/, /^https:\/\/github\.com\/settings/, /^https:\/\/aistudio\.google\.com/];
+  for (const u of urls) {
+    assert.ok(allowed.some((re) => re.test(u)), "nieznany adres w kodzie: " + u);
+  }
+});
+check("zamknięcie karty dociąga zapis na GitHubie", () => {
+  // bez tego ostatnia zmiana zostaje tylko w pamięci telefonu, a przy
+  // następnym otwarciu auto-wczytanie nadpisuje ją starą wersją z repo
+  assert.ok(js.includes('window.addEventListener("pagehide", flushGhSave)'), "brak nasłuchu pagehide");
+  assert.ok(/visibilitychange/.test(js), "brak nasłuchu visibilitychange");
+  assert.ok(/function flushGhSave\(\)/.test(js), "brak funkcji flushGhSave");
+  assert.ok(/keepalive/.test(js), "zapis przy zamykaniu karty bez keepalive");
+  // i musi chronić przed cofnięciem nowszych danych
+  assert.ok(/newestLocalStamp/.test(js), "brak porównania dat");
+});
+check("nazwa strony jest spójna w title, na pasku i w metatadce telefonu", () => {
   const title = html.match(/<title>([^<]+)<\/title>/)[1];
   const brand = html.match(/class="brand"[^>]*>(?:<span[^>]*>[^<]*<\/span>)?\s*([^<]+)</)[1].trim();
   const homeTitle = html.match(/apple-mobile-web-app-title" content="([^"]+)"/)[1];

@@ -41,7 +41,7 @@ async function boot(options = {}) {
   const dom = new JSDOM(html, {
     runScripts: "outside-only",
     pretendToBeVisual: true,
-    url: "https://example.test/przepisnik/",
+    url: options.url || "https://example.test/przepisnik/",
     virtualConsole,
   });
   const { window } = dom;
@@ -1138,6 +1138,296 @@ await test("wycofany model zapisany wcześniej nie zostaje w UI", async () => {
   ui.click('.tabbar button[data-view="settings"]');
   assert.equal(ui.window.Przepisnik.state.settings.model, "gemini-3.5-flash");
   assert.equal(ui.values("#modelInput")[0], "gemini-3.5-flash");
+});
+
+console.log("\nplik przepisów na GitHubie");
+/**
+ * Odpowiedź GitHuba: GET zwraca plik (albo 404), PUT potwierdzenie zapisu.
+ * Pozostałe adresy (Gemini) obsługuje podana odpowiedź – inaczej import by nie działał.
+ */
+function ghResponse(routes, gemini = echoTitleResponse()) {
+  return async (url, init) => {
+    if (!String(url).includes("api.github.com")) return gemini(url, init);
+    const call = { url, method: init?.method || "GET", body: init?.body ? JSON.parse(init.body) : null };
+    if (call.method === "PUT") return { ok: true, status: 200, text: async () => JSON.stringify({ content: { sha: "nowy-sha" } }), json: async () => ({ content: { sha: "nowy-sha" } }) };
+    if (routes.missing) return { ok: false, status: 404, text: async () => JSON.stringify({ message: "Not Found" }) };
+    const file = {
+      updatedAt: new Date().toISOString(),
+      recipes: [{ id: "gh1", title: "Przepis z GitHuba", ingredients: [{ name: "sól", quantity: 1, unit: "szt" }] }],
+      shopping: [],
+      ...(routes.stale || {}),
+    };
+    return {
+      ok: true,
+      status: 200,
+      text: async () =>
+        JSON.stringify({
+          sha: "stary-sha",
+          content: Buffer.from(JSON.stringify(file), "utf8").toString("base64"),
+        }),
+      json: async () => ({ sha: "stary-sha", content: "" }),
+    };
+  };
+}
+
+/** Wpisuje dane w karcie GitHuba i wysyła zdarzenie change. */
+function ghSetup(ui, { repo = "mnia/przepisnik", token = "ghp_TEST", auto = true, load = false } = {}) {
+  ui.click('.tabbar button[data-view="settings"]');
+  ui.setValue("#ghRepoInput", repo);
+  ui.setValue("#ghBranchInput", "");
+  ui.setValue("#ghTokenInput", token);
+  if (auto !== ui.$("#ghAutoSave").checked) {
+    ui.$("#ghAutoSave").checked = auto;
+    ui.$("#ghAutoSave").dispatchEvent(new ui.window.Event("change", { bubbles: true }));
+  }
+  if (load !== ui.$("#ghAutoLoad").checked) {
+    ui.$("#ghAutoLoad").checked = load;
+    ui.$("#ghAutoLoad").dispatchEvent(new ui.window.Event("change", { bubbles: true }));
+  }
+}
+
+const ghCalls = (ui) =>
+  ui.fetchCalls.filter((c) => String(c.url).includes("api.github.com")).map((c) => ({
+    url: c.url,
+    method: c.init?.method || "GET",
+    body: c.init?.body ? JSON.parse(c.init.body) : null,
+    headers: c.init?.headers || {},
+  }));
+
+await test("zapis na GitHubie wysyła plik przepisy.json", async () => {
+  const ui = await boot({ fetchResponse: ghResponse({ missing: true }) });
+  await withRecipe(ui);
+  ghSetup(ui);
+  ui.click("#btnGhSave");
+  await ui.tick();
+  await ui.tick();
+  const calls = ghCalls(ui);
+  const put = calls.find((c) => c.method === "PUT");
+  assert.ok(put, "nie było żadnego zapisu");
+  assert.match(put.url, /api\.github\.com\/repos\/mnia\/przepisnik\/contents\/przepisy\.json$/);
+  assert.equal(put.headers.authorization, "Bearer ghp_TEST");
+  const data = JSON.parse(Buffer.from(put.body.content, "base64").toString("utf8"));
+  assert.equal(data.recipes.length, 1);
+  assert.equal(data.recipes[0].title, "Placki ziemniaczane");
+  assert.ok(Array.isArray(data.shopping), "brak listy zakupów w pliku");
+  assert.equal(JSON.stringify(data).includes("AIzaTest"), false, "klucz Gemini trafił do repozytorium");
+  assert.match(ui.text("#ghState"), /Zapisano na GitHubie/);
+});
+
+await test("przycisk „Wczytaj z GitHuba” wstawia przepisy z pliku", async () => {
+  const ui = await boot({ fetchResponse: ghResponse({}) });
+  await withRecipe(ui);
+  ghSetup(ui);
+  ui.click("#btnGhLoad");
+  await ui.tick();
+  await ui.tick();
+  ui.click('.tabbar button[data-view="recipes"]');
+  assert.match(ui.text("#recipesList"), /Przepis z GitHuba/);
+  assert.match(ui.text("#recipesSub"), /1 zapisany przepis/);
+  assert.match(ui.text("#ghState"), /Wczytano z GitHuba/);
+});
+
+await test("auto-wczytywanie działa przy starcie aplikacji", async () => {
+  // Token leży poza settings (jak klucz Gemini), więc wstawiamy go do pamięci sesji
+  const ui = await boot({
+    fetchResponse: ghResponse({}),
+    storage: { sessionStorage: { "recipe-bro.gh-token": "ghp_TEST" } },
+    settings: { ghRepo: "mnia/przepisnik", ghAutoLoad: true },
+  });
+  await ui.tick();
+  await ui.tick();
+  await ui.tick();
+  assert.ok(ghCalls(ui).length > 0, "aplikacja nie zapytała GitHuba");
+  ui.click('.tabbar button[data-view="recipes"]');
+  assert.match(ui.text("#recipesList"), /Przepis z GitHuba/);
+});
+
+await test("bez zapisanego tokenu GitHub nie jest ruszany przy starcie", async () => {
+  const ui = await boot({
+    fetchResponse: ghResponse({}),
+    settings: { ghRepo: "mnia/przepisnik", ghAutoLoad: true },
+  });
+  await ui.tick();
+  await ui.tick();
+  assert.equal(ghCalls(ui).length, 0, "pyta GitHuba bez tokenu");
+  ui.click('.tabbar button[data-view="settings"]');
+  assert.equal(ui.$("#ghTokenInput").value, "", "pole tokenu powinno być puste");
+  assert.equal(ui.$("#ghRepoInput").value, "mnia/przepisnik", "repozytorium powinno zostać zapamiętane");
+});
+
+await test("bez włączonego auto-zapisu GitHub nie jest ruszany", async () => {
+  const ui = await boot({ fetchResponse: ghResponse({}) });
+  await withRecipe(ui);
+  ghSetup(ui, { auto: false });
+  ui.window.Przepisnik.setGhSaveDelay(10);
+  ui.click(".tabbar button[data-view=\"recipes\"]");
+  ui.click("[data-del]");
+  await new Promise((r) => setTimeout(r, 120));
+  assert.equal(ghCalls(ui).length, 0, "było zapytanie do GitHuba mimo wyłączonego auto-zapisu");
+});
+
+await test("auto-zapis odpala się sam po zmianie danych", async () => {
+  const ui = await boot({ fetchResponse: ghResponse({ missing: true }) });
+  await withRecipe(ui);
+  ghSetup(ui, { auto: true });
+  ui.window.Przepisnik.setGhSaveDelay(10);
+  assert.equal(ghCalls(ui).length, 0, "zapisało na GitHubie, zanim coś się zmieniło");
+  ui.click("#btnAddToShop");
+  await new Promise((r) => setTimeout(r, 120));
+  await ui.tick();
+  const put = ghCalls(ui).find((c) => c.method === "PUT");
+  assert.ok(put, "auto-zapis nie wystartował po zmianie");
+  const data = JSON.parse(Buffer.from(put.body.content, "base64").toString("utf8"));
+  assert.equal(data.shopping.length, 3, "do pliku nie poszła zmieniona lista zakupów");
+});
+
+await test("schowanie karty dociąga zapis do GitHuba", async () => {
+  const ui = await boot({ fetchResponse: ghResponse({ missing: true }) });
+  await withRecipe(ui);
+  ghSetup(ui, { auto: true });
+  ui.window.Przepisnik.setGhSaveDelay(5000); // za długi, żeby zdążyć tylko przez pagehide
+  ui.click("#btnAddToShop");
+  await new Promise((r) => setTimeout(r, 30));
+  assert.equal(ghCalls(ui).length, 0, "debounce jeszcze nie minął");
+  Object.defineProperty(ui.doc, "visibilityState", { value: "hidden", configurable: true });
+  ui.doc.dispatchEvent(new ui.window.Event("visibilitychange"));
+  await ui.tick();
+  const put = ghCalls(ui).find((c) => c.method === "PUT");
+  assert.ok(put, "zamknięcie karty nie zapisało zmiany");
+  assert.equal(put.body.branch, "main");
+});
+
+await test("nowsze przepisy w pamięci nie są cofane przez plik z repo", async () => {
+  const now = new Date().toISOString();
+  const starsze = new Date(Date.now() - 86400000).toISOString();
+  const ui = await boot({
+    fetchResponse: ghResponse({ stale: { updatedAt: starsze } }),
+    // przepis edytowany przed chwilą na telefonie, a plik w repo ma starszą wersję
+    storage: {
+      localStorage: {
+        "recipe-bro.recipes": JSON.stringify([{ id: "nowy", title: "Poprawiony przepis", updatedAt: now }]),
+      },
+      sessionStorage: { "recipe-bro.gh-token": "ghp_TEST" },
+    },
+    settings: { ghRepo: "mnia/przepisnik", ghAutoLoad: true, ghAutoSave: true },
+  });
+  await ui.tick();
+  await ui.tick();
+  await ui.tick();
+  ui.click('.tabbar button[data-view="recipes"]');
+  assert.match(ui.text("#recipesList"), /Poprawiony przepis/, "nowsze dane zostały nadpisane starą wersją z repo");
+  const put = ghCalls(ui).find((c) => c.method === "PUT");
+  assert.ok(put, "nowsze przepisy nie wróciły do repo");
+  const data = JSON.parse(Buffer.from(put.body.content, "base64").toString("utf8"));
+  assert.equal(data.recipes[0].title, "Poprawiony przepis");
+});
+
+await test("zły token pokazuje czytelny komunikat, nie surową odpowiedź GitHuba", async () => {
+  const ui = await boot({
+    fetchResponse: async () => ({ ok: false, status: 401, text: async () => JSON.stringify({ message: "Bad credentials" }) }),
+  });
+  ghSetup(ui);
+  ui.click("#btnGhSave");
+  await ui.tick();
+  await ui.tick();
+  assert.match(ui.text("#ghState"), /Token GitHuba jest nieprawidłowy/);
+  assert.doesNotMatch(ui.text("#ghState"), /Bad credentials/);
+});
+
+await test("zła nazwa repo jest odrzucona w polu, nie wysłana do API", async () => {
+  const ui = await boot({ fetchResponse: ghResponse({}) });
+  ui.click('.tabbar button[data-view="settings"]');
+  ui.setValue("#ghRepoInput", "to-nie-jest-repo");
+  assert.equal(ui.window.Przepisnik.state.settings.ghRepo, null);
+  ui.click("#btnGhSave");
+  await ui.tick();
+  assert.equal(ghCalls(ui).length, 0, "zapytało API z błędną nazwą repo");
+  assert.match(ui.text("#ghState"), /twoj-user\/przepisnik/);
+});
+
+await test("adres wklejony w pole repo zostaje oczyszczony", async () => {
+  const ui = await boot({ fetchResponse: ghResponse({}) });
+  ui.click('.tabbar button[data-view="settings"]');
+  ui.setValue("#ghRepoInput", "https://github.com/Mnia/Przepisnik.git");
+  assert.equal(ui.window.Przepisnik.state.settings.ghRepo, "Mnia/Przepisnik");
+});
+
+await test("token nie siedzi w settings (nie trafi do eksportu ani do pliku)", async () => {
+  const ui = await boot({ fetchResponse: ghResponse({}) });
+  ghSetup(ui);
+  const stored = JSON.parse(ui.window.localStorage.getItem("recipe-bro.settings"));
+  assert.equal(stored.ghToken, undefined, "token jest w settings");
+  // bez „zapamiętaj” token zostaje tylko na czas sesji
+  assert.equal(ui.window.localStorage.getItem("recipe-bro.gh-token"), null);
+  assert.equal(ui.window.sessionStorage.getItem("recipe-bro.gh-token"), "ghp_TEST");
+  // a z zapamiętaniem wędruje do swojego miejsca, nie do settings
+  ui.$("#ghRemember").checked = true;
+  ui.$("#ghRemember").dispatchEvent(new ui.window.Event("change", { bubbles: true }));
+  assert.equal(ui.window.localStorage.getItem("recipe-bro.gh-token"), "ghp_TEST");
+  assert.equal(JSON.parse(ui.window.localStorage.getItem("recipe-bro.settings")).ghToken, undefined);
+});
+
+console.log("\nudostępnianie przepisu");
+await test("karta udostępniania pokazuje link z przepisem w środku", async () => {
+  const ui = await boot({ fetchResponse: () => geminiResponse() });
+  await withRecipe(ui);
+  ui.click("#btnShareRecipe");
+  assert.match(ui.text("#shareBox"), /Udostępnij/);
+  const link = ui.$("#shareLinkBox").value;
+  assert.match(link, /^https:\/\/example\.test\/przepisnik\/#przepis=/);
+  assert.match(ui.text("#shareNote"), /Długość linku: \d+ znaków/);
+});
+
+await test("link otwiera przepis u odbiorcy i pozwala go zapisać", async () => {
+  const ui = await boot({ fetchResponse: () => geminiResponse() });
+  await withRecipe(ui);
+  const link = ui.window.Przepisnik.shareUrl(ui.window.Przepisnik.state.recipes[0]);
+
+  // drugie okno: ten sam link, pusta pamięć
+  const ui2 = await boot({ url: link });
+  assert.equal(ui2.view(), "view-editor");
+  assert.equal(ui2.values('[data-f="title"]')[0], "Placki ziemniaczane");
+  assert.equal(ui2.values('[data-f="description"]')[0], "Proste placki.");
+  assert.equal(ui2.values('[data-ing-field="name"]').length, 3);
+  ui2.click("#btnSaveDraft");
+  await ui2.tick();
+  assert.equal(ui2.view(), "view-detail");
+  assert.equal(JSON.parse(ui2.window.localStorage.getItem("recipe-bro.recipes")).length, 1);
+  assert.equal(JSON.parse(ui2.window.localStorage.getItem("recipe-bro.recipes"))[0].sourceType, "link");
+});
+
+await test("przepis z linku nie nadpisuje Twoich przepisów, dopóki go nie zapiszesz", async () => {
+  const ui = await boot({ fetchResponse: () => geminiResponse() });
+  await withRecipe(ui);
+  const link = ui.window.Przepisnik.shareUrl(ui.window.Przepisnik.state.recipes[0]);
+  const ui2 = await boot({
+    url: link,
+    storage: { localStorage: { "recipe-bro.recipes": JSON.stringify([{ id: "moj", title: "Mój przepis" }]) } },
+  });
+  assert.equal(JSON.parse(ui2.window.localStorage.getItem("recipe-bro.recipes"))[0].title, "Mój przepis");
+  assert.equal(ui2.view(), "view-editor", "otwarcie linku wywróciło aplikację");
+});
+
+await test("zwykłe wejście na stronę nie wkleja żadnego przepisu do edytora", async () => {
+  const ui = await boot();
+  assert.equal(ui.view(), "view-import");
+});
+
+await test("strona otwarta z dysku ostrzega, że link nie zadziała", async () => {
+  const ui = await boot({ fetchResponse: () => geminiResponse(), url: "file:///C:/Przepisnik/index.html" });
+  await withRecipe(ui);
+  ui.click("#btnShareRecipe");
+  assert.match(ui.text("#shareNote"), /opublikowaniu strony/, "brak ostrzeżenia o pliku z dysku");
+});
+
+await test("kopiowanie linku bez schowka nie wywala aplikacji", async () => {
+  const ui = await boot({ fetchResponse: () => geminiResponse() });
+  await withRecipe(ui);
+  ui.click("#btnShareRecipe");
+  ui.click("#btnCopyLink");
+  await ui.tick();
+  // jsdom nie ma schowka – wiadomość musi być czytelna, a nie wyjątek
+  assert.ok(ui.errors.length === 0, ui.errors.join(" | "));
 });
 
 console.log("\nbłędy w konsoli");

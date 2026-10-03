@@ -44,20 +44,80 @@ Worker, Netlify Functions) — wtedy klucz zostaje w nim, a strona tylko prosi o
 | **📷 Import** | Zdjęcie (aparat lub galeria), link albo tekst → AI. Przed zapisem możesz wszystko poprawić. |
 | **📖 Przepisy** | Wszystkie zapisane, wyszukiwanie po nazwie i składnikach, filtrowanie po tagach. |
 | **🛒 Zakupy** | Lista zakupów. Pozycje z tego samego produktu sumują się (400 g + 200 g = 600 g). |
-| **⚙️ Ustawienia** | Klucz, model Gemini, domyślne porcje, eksport i import danych. |
+| **⚙️ Ustawienia** | Klucz, model Gemini, domyślne porcje, plik przepisów na GitHubie, eksport i import danych. |
 
 Przy przepisie:
 
 - **Porcje** – wpisz liczbę, a ilości przeliczą się same względem oryginału.
 - Odznacz składniki, których nie kupujesz – przycisk doda tylko resztę.
+- **Udostępnij** – link z przepisem w środku albo czytelny tekst do wklejenia (niżej).
 - **Usuń przepis** – zniknie też z listy zakupów, ale tylko te pozycje, które pochodziły
   wyłącznie z tego przepisu.
 
-Wszystkie dane leżą w `localStorage` tej przeglądarki. Zdjęcia importowane są **wysyłane do
-Gemini, ale nigdzie nie są zapisywane**. Kopia zapasowa: Ustawienia → Eksport do pliku JSON.
+Wszystkie dane leżą w `localStorage` tej przeglądarki albo — jeśli włączysz GitHuba — w pliku
+`przepisy.json` w repozytorium (niżej). Zdjęcia importowane są **wysyłane do Gemini, ale nigdzie nie
+są zapisywane**. Ręczna kopia zapasowa: Ustawienia → Eksport do pliku JSON.
 
 Nawigacja (**Import / Przepisy / Zakupy / Ustawienia**) jest u góry strony, razem z nazwą
 aplikacji — cały ten blok zostaje przyklejony przy przewijaniu.
+
+---
+
+## Przepisy w pliku na GitHubie (ten sam zestaw w każdej przeglądarce)
+
+Przepisy w `localStorage` są **per urządzenie i per przeglądarka** — na telefonie masz swoje, na
+komputerze inne. Jeśli chcesz **ten sam zestaw wszędzie**, w Ustawieniach wskaż repozytorium
+GitHub. Aplikacja trzyma w nim plik `przepisy.json` i wymienia go z każdą przeglądarką:
+
+- **Wczytuj z GitHuba przy każdym otwarciu** — otwierasz stronę na telefonie, komputerze czy
+  tablecie i masz te same przepisy;
+- **Zapisuj automatycznie** — każda zmiana (nowy przepis, usunięcie, pozycja na zakupach) po
+  4 sekundach trafia do repozytorium; przed zamknięciem karty zapis idzie od razu;
+- przyciski **Wczytaj z GitHuba** i **Zapisz na GitHubie** działają zawsze, gdy auto jest wyłączone.
+
+Dzięki temu GitHub jest też **historią zmian** i kopią zapasową — w każdej chwili możesz cofnąć
+przepis do poprzedniej wersji.
+
+### Co trzeba zrobić
+
+1. Załóż repozytorium na GitHubie. **Prywatne** — przepisy to nie sprawy publiczne (patrz niżej).
+2. Wejdź w **Settings → Developer settings → Personal access tokens → Fine-grained tokens** i
+   wystaw token: **tylko jedno** repozytorium, uprawnienie **Contents: Read and write**.
+3. W Przepiśniku: **⚙️ Ustawienia → Ten sam plik przepisów wszędzie**, wpisz `twoj-user/nazwa-repo`
+   (albo wklej cały adres — aplikacja sama wyczyści `https://github.com/`), wklej token, zaznacz obie
+   automatyczne opcje i kliknij **Zapisz na GitHubie**.
+4. Na drugim urządzeniu: wpisz to samo repozytorium i **ten sam token** (token nie przenosi się
+   sam — jest sekretem przeglądarki, jak klucz Gemini).
+
+### Zasady i granice
+
+- **Token jest w przeglądarce**, więc przepisy trzymaj w **prywatnym** repo. W publicznym repo
+  plik `przepisy.json` da się odczytać bez logowania — aplikacja ostrzega o tym w Ustawieniach.
+  Najwygodniej: strona żyje w publicznym repo, a dane w osobnym prywatnym (`przepisnik-dane`).
+- **Token nie zapisuje się w ustawieniach** ani w pliku przepisów — siedzi obok klucza Gemini,
+  w pamięci sesji (albo na stałe, jeśli zaznaczysz „Zapamiętaj token na tym urządzeniu").
+- **Dwie przeglądarki otwarte w tej samej chwili** mogą nadpisać się nawzajem: wygrywa ostatni zapis.
+  Zmiany w rekordach przepisów są chronione datą — jeśli na telefonie poprawisz przepis później niż
+  plik w repo, aplikacja zachowa Twoją wersję i wypchnie ją do repozytorium.
+- Prywatne repozytorium z GitHub Pages wymaga płatnego planu — dlatego osobne repo na dane.
+- Do zapisu wystarczy zwykły limit API (5000 zapytań/h na token); auto-zapis łączy kilka zmian w jedno.
+
+---
+
+## Dzielenie się przepisem
+
+Przy przepisie jest karta **Udostępnij** z dwoma przyciskami:
+
+- **Kopiuj link** — cały przepis siedzi w części adresu za znakiem `#`, więc link jest sam w sobie
+  przepisem. Otwiera go ktokolwiek, w każdej przeglądarce, bez logowania i bez Twojego serwera;
+  u odbiorcy otwiera się gotowy przepis w edytorze do poprawienia i zapisania. Treść **nigdy nie
+  wychodzi na serwer strony** — to fragment adresu, którego przeglądarka nie wysyła.
+- **Kopiuj tekstem** — czytelny przepis do wklejenia w komunikatorze; działa też jako
+  awaryjny wariant, gdyby link był bardzo długi (przycisk sam ostrzega powyżej ~4000 znaków).
+
+Do linków nadaje się **opublikowaną stronę** (GitHub Pages) — plik `index.html` otwarty z dysku
+nie da się udostępnić, bo odbiorca nie miałby gdzie kliknąć. Poza ostrzeżeniem o długości link
+jest zwykłym adresem HTTP.
 
 ---
 
@@ -145,9 +205,9 @@ npm run test:quick # bez zależności (sprawdzenie + logika)
 
 | Plik | Co sprawdza |
 | --- | --- |
-| `test-wiring.mjs` | spójność szkieletu: czy każde `#id` użyte w JS istnieje w HTML, czy każda klasa jest w CSS, czy nic nie wycieka do `fetch` poza Gemini, czy klucz nie leci w URL, czy nie ma niescapowanych danych w `innerHTML`. |
-| `test-logic.mjs` | ładuje `app.js` w `node:vm` z atrapą DOM i sprawdza logikę: jednostki, ułamki, skalowanie, scalanie listy zakupów, budowę zapytania do Gemini (przepis i miniaturka), mapowanie błędów (401/404/429/503/brak sieci) i obronę przed danymi z importowanego pliku. |
-| `test-ui.mjs` | przeklika całą aplikację w prawdziwym DOM (jsdom): klucz, import z tekstu, linku i zdjęcia, czyszczenie pól po imporcie, anulowanie, miniaturki rysowane przez AI (także blokada z powodu limitu planu), edycja, zapis, skalowanie porcji, dodanie do zakupów, scalanie ilości, usuwanie, eksport/import, odzyskiwanie szkicu. |
+| `test-wiring.mjs` | spójność szkieletu: czy każde `#id` użyte w JS istnieje w HTML, czy każda klasa jest w CSS, czy nic nie wycieka do `fetch` poza Gemini i GitHubem, czy klucz nie leci w URL, czy token nie ląduje w pliku przepisów ani w ustawieniach, czy nie ma niescapowanych danych w `innerHTML`. |
+| `test-logic.mjs` | ładuje `app.js` w `node:vm` z atrapą DOM i sprawdza logikę: jednostki, ułamki, skalowanie, scalanie listy zakupów, budowę zapytania do Gemini (przepis i miniaturka), mapowanie błędów (401/404/429/503/brak sieci), obronę przed danymi z importowanego pliku, zapis i odczyt pliku `przepisy.json` na GitHubie (sha, gałąź, base64 z polskimi znakami) oraz kodowanie i odkodowywanie przepisu w linku. |
+| `test-ui.mjs` | przeklika całą aplikację w prawdziwym DOM (jsdom): klucz, import z tekstu, linku i zdjęcia, czyszczenie pól po imporcie, anulowanie, miniaturki rysowane przez AI (także blokada z powodu limitu planu), edycja, zapis, skalowanie porcji, dodanie do zakupów, scalanie ilości, usuwanie, eksport/import, odzyskiwanie szkicu, zapis i wczytywanie na GitHubie (w tym auto-zapis, dociąganie zapisu przy zamykaniu karty i ochrona nowszych danych) oraz udostępnianie linkiem od strony odbiorcy. |
 
 `test-ui.mjs` potrzebuje jsdom, więc przed nim `npm install` (albo samo `npm ci` na CI).
 Test uruchamia się w pamięci – nie zapisuje niczego w `localStorage` przeglądarki.
@@ -171,9 +231,15 @@ modele 2.x zostały wycofane).
 
 ## Ograniczenia
 
-- **Bez serwera = brak sekretów.** Klucz jest widoczny w przeglądarce (patro wyżej).
+- **Bez serwera = brak sekretów.** Klucz jest widoczny w przeglądarce (patro wyżej), tak samo token
+  GitHuba.
 - **Przechowywanie w `localStorage`.** Przepisy są per urządzenie i per przeglądarka; po
-  czyszczeniu danych przeglądarki znikają. Stąd eksport do JSON.
+  czyszczeniu danych przeglądarki znikają. Dlatego eksport do JSON i opcjonalny plik na GitHubie.
+- **GitHub to synchronizacja, nie multiurządzenie w czasie rzeczywistym.** Dwie przeglądarki otwarte
+  naraz mogą nadpisać się nawzajem (wygrywa ostatni zapis); po zamknięciu jednej i otwarciu drugiej
+  wszystko jest już zsynchronizowane.
+- **Link do przepisu działa tylko na opublikowanej stronie** — plik `index.html` z dysku nie ma
+  adresu, pod którym odbiorca mógłby otworzyć przepis.
 - **Zdjęcia nie są zapisywane** – `localStorage` ma ~5 MB, a zdjęcia z telefonu są duże.
   Świadomie odpuściłem je, żeby nie zaśmiecać pamięci. Tak samo rysunki AI: znikają po
   odświeżeniu strony.
