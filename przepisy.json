@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-03T23:05:38.066Z",
+  "updatedAt": "2026-10-03T23:07:40.535Z",
   "recipes": [
     {
       "id": "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7",
@@ -530,5 +530,127 @@
       "updatedAt": "2026-10-03T22:51:33.841Z"
     }
   ],
-  "shopping": []
+  "shopping": [
+    {
+      "id": "074b43e1-a6d5-473f-a95c-ad9139383d1d",
+      "name": "olej",
+      "unit": "ml",
+      "quantity": 45,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    },
+    {
+      "id": "ec56e94a-7ea5-4298-9937-33243b49e016",
+      "name": "kmin rzymski",
+      "unit": "ml",
+      "quantity": 5,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    },
+    {
+      "id": "455b25f0-46c6-47d0-b28e-f9118c01d45a",
+      "name": "cebula",
+      "unit": "g",
+      "quantity": 220,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    },
+    {
+      "id": "2cdac3cb-54b6-4a17-b0b0-9e5d78d5a4c2",
+      "name": "imbir",
+      "unit": "szt",
+      "quantity": 1,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    },
+    {
+      "id": "09ec7cb2-a970-4a5f-a45c-edec0e8a1b4c",
+      "name": "wołowina mielona",
+      "unit": "g",
+      "quantity": 450,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    },
+    {
+      "id": "992b6f87-6378-438b-b670-d266a331ea6d",
+      "name": "pomidor",
+      "unit": "g",
+      "quantity": 250,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    },
+    {
+      "id": "8c581e26-05f7-487a-aef8-03939f7a6353",
+      "name": "kolendra mielona",
+      "unit": "ml",
+      "quantity": 5,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    },
+    {
+      "id": "72c040d9-e7e0-4084-ae36-a084d45c90e8",
+      "name": "zielony groszek",
+      "unit": "g",
+      "quantity": 130,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    },
+    {
+      "id": "21b0210a-3352-4b50-9a5c-5693b2ff79dd",
+      "name": "garam masala",
+      "unit": "ml",
+      "quantity": 2.5,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    },
+    {
+      "id": "a35b137d-56de-406a-a8f1-829c65f263e3",
+      "name": "kolendra świeża",
+      "unit": "ml",
+      "quantity": 60,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    },
+    {
+      "id": "7e48b94d-675b-4100-94d7-552c9c44f4c5",
+      "name": "sok z cytryny",
+      "unit": "ml",
+      "quantity": 2.5,
+      "checked": false,
+      "fromRecipes": [
+        "dc097d8b-1cd0-4e44-a1b2-f93bcf6825b7"
+      ],
+      "manual": false
+    }
+  ]
 }
