@@ -1,32 +1,32 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-03T22:54:42.104Z",
+  "updatedAt": "2026-10-03T22:55:43.021Z",
   "recipes": [
     {
-      "id": "b9bc8ff2-9c8e-42ec-bb01-7199d9ee4f5e",
-      "title": "Kremowe curry z kurczakiem i czosnkiem",
-      "description": "Aromatyczne danie z kurczakiem w kremowym sosie na bazie nerkowców i dużej ilości czosnku.",
+      "id": "4dbf1042-380d-4a0e-bca9-99e30409d2cf",
+      "title": "Czosnkowe curry",
+      "description": "Aromatyczne danie z kurczaka w kremowym sosie z nerkowców, z wyraźną nutą czosnku i przypraw korzennych.",
       "servings": 4,
       "prepMinutes": 20,
-      "cookMinutes": 20,
-      "totalMinutes": 40,
+      "cookMinutes": 25,
+      "totalMinutes": 45,
       "tags": [
         "kurczak",
         "curry",
-        "kuchnia indyjska",
-        "obiad"
+        "obiad",
+        "kuchnia indyjska"
       ],
       "ingredients": [
         {
-          "id": "902dce36-bf39-405d-8ad6-af3e8c92ae9d",
-          "raw": "400-450 g piersi lub udek z kurczaka",
+          "id": "bc57dc9c-0464-4369-a427-6543163cd483",
+          "raw": "400–450 g piersi lub udek z kurczaka",
           "name": "kurczak",
-          "quantity": 425,
+          "quantity": 450,
           "unit": "g",
-          "note": "pierś lub udek"
+          "note": "pierś lub udka"
         },
         {
-          "id": "09b4fd2c-b098-42d9-a6ac-9e5283861015",
+          "id": "1647c096-8811-416c-8de3-c671e470fed2",
           "raw": "70 g nerkowców",
           "name": "nerkowiec",
           "quantity": 70,
@@ -34,7 +34,7 @@
           "note": ""
         },
         {
-          "id": "02118064-a1fc-430e-9296-d4698429b9f7",
+          "id": "203c64e3-c881-46df-81d4-7f82400503c3",
           "raw": "½ małej cebuli",
           "name": "cebula",
           "quantity": 0.5,
@@ -42,23 +42,23 @@
           "note": "mała"
         },
         {
-          "id": "bc30617a-5d0e-460b-be34-60e702273de3",
-          "raw": "5-6 ząbków czosnku",
+          "id": "40176406-7674-4992-b302-9c68b58e514d",
+          "raw": "5–6 ząbków czosnku",
           "name": "czosnek",
-          "quantity": 5.5,
+          "quantity": 6,
           "unit": "szt",
           "note": ""
         },
         {
-          "id": "30ad0dc3-b810-4de4-a146-05b310d15ba3",
-          "raw": "1 kawałek imbiru, ok. 2-3 cm",
+          "id": "c5a01bca-1bf0-4d50-b5f9-242deb1520fa",
+          "raw": "1 kawałek imbiru, ok. 2–3 cm",
           "name": "imbir",
-          "quantity": 2.5,
+          "quantity": 3,
           "unit": "cm",
           "note": ""
         },
         {
-          "id": "96352b6e-91e2-415a-acf9-41c33f113079",
+          "id": "4e0555ff-fb61-4408-b4a7-d4deba7ed243",
           "raw": "150 ml śmietanki 18% lub 30%",
           "name": "śmietanka",
           "quantity": 150,
@@ -66,15 +66,15 @@
           "note": "18% lub 30%"
         },
         {
-          "id": "4c637ca4-ca2e-48f6-9459-009655462570",
-          "raw": "100-150 ml wody",
+          "id": "63111ee3-427e-4876-ad13-d09019ca4755",
+          "raw": "100–150 ml wody",
           "name": "woda",
-          "quantity": 125,
+          "quantity": 150,
           "unit": "ml",
-          "note": "do sosu"
+          "note": ""
         },
         {
-          "id": "e7071f15-fb96-4c1c-a583-67ce482182e7",
+          "id": "73a22513-bdad-43d8-bf56-4464e02951f4",
           "raw": "1 łyżka ghee lub masła",
           "name": "masło klarowane",
           "quantity": 15,
@@ -82,7 +82,7 @@
           "note": "ghee lub masło"
         },
         {
-          "id": "2eaadf1b-35f6-4354-b252-5f5e424325b5",
+          "id": "1145095e-13e1-4a29-a187-07e06bcefdbb",
           "raw": "1 łyżka oleju",
           "name": "olej",
           "quantity": 15,
@@ -90,7 +90,7 @@
           "note": ""
         },
         {
-          "id": "be6d21e3-1825-4e91-8dbf-2669fbca07f7",
+          "id": "adaf2b2e-d10e-4ddf-86d9-f1ca02c200f4",
           "raw": "1 łyżeczka garam masala",
           "name": "garam masala",
           "quantity": 5,
@@ -98,7 +98,7 @@
           "note": ""
         },
         {
-          "id": "744f6298-4d04-45f3-b9d5-049aa2d0f096",
+          "id": "fa7a592c-c952-4424-8984-78d760769008",
           "raw": "1 łyżeczka mielonej kolendry",
           "name": "kolendra mielona",
           "quantity": 5,
@@ -106,7 +106,7 @@
           "note": ""
         },
         {
-          "id": "3889d31b-3b30-4faa-b345-b58e13f2f14c",
+          "id": "1f723044-b6f5-4444-9d06-0a63e5ccac5d",
           "raw": "½ łyżeczki kuminu",
           "name": "kumin",
           "quantity": 2.5,
@@ -114,7 +114,7 @@
           "note": ""
         },
         {
-          "id": "26752ff5-3116-4354-8adf-e9dfa68a0c54",
+          "id": "1b89cfbd-0374-442a-8fc0-6c54733e2150",
           "raw": "½ łyżeczki kurkumy",
           "name": "kurkuma",
           "quantity": 2.5,
@@ -122,7 +122,7 @@
           "note": ""
         },
         {
-          "id": "b8ad15a1-c8c7-422f-ba00-ad246a0eaa81",
+          "id": "db6c5c32-e4df-45e2-9bab-187ba57334fb",
           "raw": "½ łyżeczki chili Kashmiri lub zwykłego chili",
           "name": "chili",
           "quantity": 2.5,
@@ -130,15 +130,15 @@
           "note": ""
         },
         {
-          "id": "d8e830f4-17cf-4579-9705-586c3ceadd2c",
-          "raw": "½ łyżeczki soli, potem do smaku",
+          "id": "9842a2d4-fed3-4e62-9ab9-51ffbb1353ad",
+          "raw": "½ łyżeczki soli",
           "name": "sól",
           "quantity": 2.5,
           "unit": "ml",
           "note": "do smaku"
         },
         {
-          "id": "a06223c6-f71e-40fb-ab63-03c399336034",
+          "id": "540c7e6b-dc75-4bba-9dca-365be3b7cdf0",
           "raw": "1 łyżeczka soku z cytryny",
           "name": "sok z cytryny",
           "quantity": 5,
@@ -146,52 +146,62 @@
           "note": ""
         },
         {
-          "id": "9462032c-a8b9-43f6-a1a1-84cfd728d413",
-          "raw": "opcjonalnie: 2-3 strączki kardamonu",
+          "id": "39d09e2f-c187-4766-87e7-51fd353afc28",
+          "raw": "2–3 strączki kardamonu",
           "name": "kardamon",
-          "quantity": 2.5,
+          "quantity": 3,
           "unit": "szt",
           "note": "opcjonalnie"
         },
         {
-          "id": "3a996e54-2e53-448b-9f73-79fd11964d8f",
-          "raw": "opcjonalnie: świeża kolendra do podania",
+          "id": "357dcb6f-d90c-4f41-9c4f-ca1320202006",
+          "raw": "świeża kolendra do podania",
           "name": "kolendra świeża",
           "quantity": 0,
           "unit": "szt",
-          "note": "do podania"
+          "note": "opcjonalnie"
         }
       ],
       "steps": [
         {
-          "id": "d94787c1-e51c-48ca-82f3-5eb066c1c359",
-          "text": "Zalej nerkowce gorącą wodą i zostaw na 15-20 minut. Odcedź, dodaj około 50 ml wody i zblenduj na gładką pastę.",
+          "id": "f92b6ad2-d3d0-4e18-a1a9-89e1d257522e",
+          "text": "Zalej nerkowce gorącą wodą i odstaw na 15-20 minut. Odcedź, dodaj 50 ml wody i zblenduj na gładką pastę.",
           "durationMinutes": 20
         },
         {
-          "id": "bf6f4fbb-057b-4d65-9948-ca77a9c0130b",
-          "text": "Kurczaka pokrój w kawałki i wymieszaj z częścią garam masala, kuminu, soli i oleju. Rozgrzej patelnię i mocno obsmaż kurczaka przez kilka minut, a następnie zdejmij go na talerz.",
+          "id": "7b645648-c4c9-498c-80c8-ff6b9fd8abe7",
+          "text": "Kurczaka pokrój w kawałki, wymieszaj z częścią garam masala, kuminu, solą i olejem. Obsmaż na patelni przez kilka minut i zdejmij na talerz.",
           "durationMinutes": 5
         },
         {
-          "id": "a5d1b102-e528-42fe-8960-f5f5366e0060",
-          "text": "Na tej samej patelni rozgrzej masło/ghee z resztą oleju. Dodaj drobno posiekaną cebulę i smaż 2-3 minuty. Dodaj starty imbir oraz posiekany czosnek i smaż przez 30-60 sekund.",
-          "durationMinutes": 4
+          "id": "4bd3068e-e910-4735-890c-c93d5fd67750",
+          "text": "Na tej samej patelni rozgrzej masło i resztę oleju, podsmaż drobno posiekaną cebulę przez 2-3 minuty.",
+          "durationMinutes": 3
         },
         {
-          "id": "e6f0b8dc-5d87-4b77-9719-ed3934b282c8",
-          "text": "Dodaj pozostałe przyprawy (kumin, kolendrę, kurkumę, chili, resztę garam masala, kardamon) i smaż 20-30 sekund, aż zaczną pachnieć.",
+          "id": "8852f897-22be-46a3-8f3d-9c3e36a728f0",
+          "text": "Dodaj starty imbir i większość posiekanego czosnku, smaż 1 minutę.",
           "durationMinutes": 1
         },
         {
-          "id": "c573b8d4-b5df-420b-94bb-984d2a18afc2",
-          "text": "Dodaj pastę z nerkowców i około 100 ml wody. Wymieszaj, dodaj kurczaka i duś pod przykryciem 8-10 minut.",
+          "id": "5766cad7-3fdd-493d-8869-88440b6a0ab0",
+          "text": "Dodaj pozostałe przyprawy (kumin, kolendrę, kurkumę, chili, resztę garam masala, kardamon) i smaż 30 sekund.",
+          "durationMinutes": 1
+        },
+        {
+          "id": "96ed4438-9d25-4183-b3e1-ae01419066a4",
+          "text": "Dodaj pastę z nerkowców i 100 ml wody, wymieszaj. Włóż kurczaka i duś pod przykryciem 8-10 minut.",
           "durationMinutes": 10
         },
         {
-          "id": "77980212-e5eb-4fa4-b5f9-7122ef6b1e83",
-          "text": "Dodaj śmietankę oraz ostatni ząbek czosnku starty na drobno. Podgrzewaj 2-3 minuty bez agresywnego gotowania. Na koniec dodaj sok z cytryny i dopraw solą.",
+          "id": "72296de6-ed66-447a-b104-0b53cb37b581",
+          "text": "Dodaj śmietankę oraz ostatni ząbek czosnku (drobno starty), podgrzewaj 2-3 minuty bez gotowania.",
           "durationMinutes": 3
+        },
+        {
+          "id": "9e9efe7d-9e89-4642-b661-99a002fa2d67",
+          "text": "Na koniec dodaj sok z cytryny i dopraw solą do smaku.",
+          "durationMinutes": 1
         }
       ],
       "warnings": [
@@ -199,8 +209,8 @@
       ],
       "source": null,
       "sourceType": "image",
-      "createdAt": "2026-10-03T22:54:38.100Z",
-      "updatedAt": "2026-10-03T22:54:38.100Z"
+      "createdAt": "2026-10-03T22:55:39.019Z",
+      "updatedAt": "2026-10-03T22:55:39.019Z"
     },
     {
       "id": "26e106fe-8382-42fd-9355-6f9ddac3f2f7",
