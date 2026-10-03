@@ -1,0 +1,15 @@
+{
+  "name": "przepisnik",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Przepiśnik - przepisy ze zdjec, linkow i tekstu. Statyczna strona, bez buildu i bez serwera.",
+  "scripts": {
+    "start": "node serve.mjs 3020",
+    "test": "node --check app.js && node test-wiring.mjs && node test-logic.mjs && node test-ui.mjs",
+    "test:quick": "node --check app.js && node test-wiring.mjs && node test-logic.mjs",
+    "live": "node live-check.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^27.0.0"
+  }
+}

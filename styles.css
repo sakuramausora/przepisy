@@ -1,0 +1,811 @@
+/* Przepiśnik – jedna statyczna strona, bez buildu.
+   Mobile first; na szerokich ekranach pasek zakładek wędruje na górę. */
+
+:root {
+  --bg: #fffaf4;
+  --bg-soft: #ffffff;
+  --bg-sunk: #f4ece1;
+  --text: #1b1713;
+  --muted: #6b6157;
+  --line: rgba(27, 23, 19, 0.12);
+  --accent: #ea580c;
+  --accent-soft: #ffedd5;
+  --accent-text: #9a3412;
+  --ok: #15803d;
+  --ok-soft: #dcfce7;
+  --warn: #a16207;
+  --warn-soft: #fef9c3;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+  --radius: 16px;
+  --tap: 44px;
+  --tabbar-h: 62px;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14100d;
+    --bg-soft: #1d1815;
+    --bg-sunk: #241d18;
+    --text: #f5efe7;
+    --muted: #a89c8e;
+    --line: rgba(255, 255, 255, 0.14);
+    --accent: #f97316;
+    --accent-soft: #431407;
+    --accent-text: #fdba74;
+    --ok: #4ade80;
+    --ok-soft: #052e16;
+    --warn: #fde047;
+    --warn-soft: #422006;
+    --danger: #f87171;
+    --danger-soft: #450a0a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  /* nav jest u góry, więc na dole zostaje tylko margines gestu iPhone'a */
+  padding-bottom: env(safe-area-inset-bottom);
+  overscroll-behavior-y: contain;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ---------- layout ---------- */
+
+/* Pasek nawigacji siedzi u góry, w tym samym przyklejonym bloku co nazwa
+   aplikacji – dzięki temu nie trzeba liczyć dwóch niezależnych wysokości
+   i nic nie chowa się pod zawartością przy przewijaniu. */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding: 10px 14px 0;
+  padding-top: calc(10px + env(safe-area-inset-top));
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+main {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 14px 14px 28px;
+}
+
+.tabbar {
+  display: flex;
+  /* pełna szerokość ekranu mimo wyrównania treści do 780 px */
+  margin: 0 -14px;
+  border-top: 1px solid var(--line);
+}
+
+.tabbar button {
+  flex: 1;
+  min-height: var(--tabbar-h);
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 6px 2px;
+  position: relative;
+}
+
+.tabbar button .ico {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.tabbar button[aria-current="page"] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.tabbar .badge {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  margin-left: 6px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+@media (min-width: 860px) {
+  .tabbar {
+    max-width: 780px;
+    margin: 0 auto;
+    border-top: 1px solid var(--line);
+  }
+  .tabbar button {
+    flex-direction: row;
+    gap: 8px;
+    font-size: 14px;
+    min-height: 46px;
+  }
+  .tabbar .badge {
+    position: static;
+    margin-left: 0;
+  }
+}
+
+/* ---------- elementy ---------- */
+
+h1 {
+  font-size: 1.35rem;
+  margin: 0 0 4px;
+  letter-spacing: -0.015em;
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin: 0 0 10px;
+}
+
+h3 {
+  font-size: 0.95rem;
+  margin: 0 0 6px;
+}
+
+p {
+  margin: 0 0 10px;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin: 0 0 14px;
+}
+
+.card {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.card.tight {
+  padding: 10px 12px;
+}
+
+.note {
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  margin-bottom: 12px;
+}
+
+.note.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.note.err {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.note.ok {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.note.info {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+label.field {
+  display: block;
+  margin-bottom: 12px;
+}
+
+label.field > span {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 16px; /* bez tego iOS zoomuje przy fokusie */
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: var(--tap);
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn.ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.btn.danger {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+  color: var(--danger);
+}
+
+.btn.block {
+  width: 100%;
+}
+
+.btn.sm {
+  min-height: 38px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 10px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.row.end {
+  justify-content: flex-end;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.seg {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.seg button {
+  flex: 1 1 auto;
+  min-width: 88px;
+  min-height: var(--tap);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.seg button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--bg-sunk);
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.chip.accent {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.chip.ok {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.chip.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.82rem;
+}
+
+.tiny {
+  font-size: 0.74rem;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.mt {
+  margin-top: 10px;
+}
+
+.mb {
+  margin-bottom: 10px;
+}
+
+/* ---------- lista przepisów ---------- */
+
+.card.recipe {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.card.recipe h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-sunk);
+}
+
+.thumb.ph {
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+}
+
+.recipe-head {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+}
+
+.clamp2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- edytor składników ---------- */
+
+.ing {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 9px 10px;
+  margin-bottom: 8px;
+  background: var(--bg);
+}
+
+.ing .preview {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-top: 6px;
+}
+
+.ing .ops {
+  display: flex;
+  gap: 6px;
+  margin-top: 7px;
+  align-items: center;
+}
+
+.icon-btn {
+  min-height: 34px;
+  min-width: 34px;
+  padding: 4px 9px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.icon-btn[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent-text);
+}
+
+.icon-btn:hover {
+  color: var(--text);
+}
+
+.step {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.num {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.step .num {
+  width: 26px;
+  height: 26px;
+  margin-top: 7px;
+  font-size: 0.78rem;
+}
+
+.step textarea {
+  min-height: 46px;
+}
+
+.step .side {
+  flex-shrink: 0;
+  width: 62px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.step .side input {
+  min-height: 34px;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.step .moves {
+  display: flex;
+  gap: 3px;
+}
+
+.step .moves button {
+  flex: 1;
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+/* ---------- lista zakupów ---------- */
+
+.detail-step {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.detail-step .step-text {
+  font-size: 0.94rem;
+}
+
+.shop-group h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 6px 4px;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.shop-item:last-child {
+  border-bottom: 0;
+}
+
+.shop-item input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.shop-item .name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.shop-item .qty {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.shop-item.done .name {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+/* ---------- listy w dwóch kolumnach (składniki, zakupy) ---------- */
+
+.cols2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* W ostatnim wierszu siatki nie zostawiamy wiszącej kreski.
+   Przy nieparzystej liczbie zniknie jedna dodatkowa – kosmetyka, nie błąd układu. */
+.cols2 > :nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+@media (max-width: 359px) {
+  .cols2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ing-item {
+  cursor: pointer;
+}
+
+/* Edytor: na szerokim ekranie dwa składniki obok siebie.
+   Na telefonie zostaje jedna kolumna – pola ilość/jednostka/nazwa muszą mieć miejsce. */
+@media (min-width: 900px) {
+  .ing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: start;
+  }
+
+  .ing-grid > .ing {
+    margin-bottom: 0;
+  }
+
+  .ing-grid > p {
+    grid-column: 1 / -1;
+  }
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 18px 8px;
+}
+
+.keypill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 34px;
+}
+
+.keypill.ok {
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 40%, transparent);
+}
+
+.keypill.bad {
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
+}
+
+/* ---------- globalny komunikat ---------- */
+
+#toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  /* pasek nawigacji jest u góry, więc komunikat ląduje po prostu nad dolną krawędzią */
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 40;
+  width: min(560px, calc(100% - 24px));
+  pointer-events: none;
+}
+
+#toast .note {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+  margin: 0;
+}
+
+@media (min-width: 860px) {
+  #toast {
+    bottom: 18px;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--accent);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: -3px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.drop {
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 22px 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.88rem;
+  cursor: pointer;
+  background: var(--bg);
+}
+
+.drop.over {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Miniatura rysowana przez AI w miejscu ikony w polu na zdjęcie */
+.art {
+  width: 128px;
+  height: 128px;
+  margin: 0 auto;
+  border-radius: 14px;
+  object-fit: cover;
+  background: var(--bg-sunk);
+  border: 1px solid var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
