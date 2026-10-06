@@ -1,7 +1,213 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-05T11:47:42.141Z",
+  "updatedAt": "2026-10-06T13:35:14.657Z",
   "recipes": [
+    {
+      "id": "f3fcf90c-b213-4cbc-98da-a7bf0975f51d",
+      "title": "Keema Matar (Curry z mielonej wołowiny z groszkiem)",
+      "description": "Pakistańskie danie jednogarnkowe z mielonej wołowiny i zielonego groszku, pełne aromatycznych przypraw. Jest szybkie w przygotowaniu i doskonale smakuje z naanem lub ryżem.",
+      "servings": 4,
+      "prepMinutes": 15,
+      "cookMinutes": 30,
+      "totalMinutes": 45,
+      "tags": [
+        "pakistańskie",
+        "curry",
+        "wołowina",
+        "jednogarnkowe",
+        "obiad"
+      ],
+      "ingredients": [
+        {
+          "id": "8b438a91-dc9a-433d-9400-b2dfe22668a4",
+          "raw": "3 tbsp neutral oil, such as grapeseed or avocado",
+          "name": "olej roślinny",
+          "quantity": 45,
+          "unit": "ml",
+          "note": "neutralny w smaku"
+        },
+        {
+          "id": "7741ce40-f56b-4f98-bf96-a86e393b621b",
+          "raw": "1 tsp cumin seeds",
+          "name": "kmin rzymski",
+          "quantity": 5,
+          "unit": "ml",
+          "note": "ziarna"
+        },
+        {
+          "id": "8f7472d5-66c5-4dc8-91b3-48f6811fdcaa",
+          "raw": "1 (~220 g) medium onion, finely chopped",
+          "name": "cebula",
+          "quantity": 220,
+          "unit": "g",
+          "note": "drobno posiekana"
+        },
+        {
+          "id": "ad1db3b6-2e32-4f74-ab6c-a471f1b51656",
+          "raw": "5-6 garlic cloves, crushed or very finely chopped",
+          "name": "czosnek",
+          "quantity": 6,
+          "unit": "szt",
+          "note": "rozgnieciony lub drobno posiekany"
+        },
+        {
+          "id": "99b27c1e-7a0c-4c44-accb-86ea1c38612c",
+          "raw": "1- inch piece ginger, crushed or very finely chopped",
+          "name": "imbir",
+          "quantity": 3,
+          "unit": "cm",
+          "note": "świeży, rozgnieciony lub drobno posiekany"
+        },
+        {
+          "id": "5e4cc9cd-ff93-4ed3-ad2b-5980a69a8e55",
+          "raw": "1 lb ground beef",
+          "name": "wołowina mielona",
+          "quantity": 450,
+          "unit": "g",
+          "note": "o zawartości tłuszczu ok. 20%"
+        },
+        {
+          "id": "d0f2e627-27c3-4ff1-8285-e64feaa7325b",
+          "raw": "1 medium (2 small/~250 g) ripe tomato, finely chopped",
+          "name": "pomidor",
+          "quantity": 250,
+          "unit": "g",
+          "note": "dojrzały, drobno posiekany"
+        },
+        {
+          "id": "568eeb78-4712-4df9-b8f9-94b2c541af1e",
+          "raw": "1-2 green chili peppers (such as a small Serrano or Thai chili), chopped",
+          "name": "zielona papryczka chili",
+          "quantity": 2,
+          "unit": "szt",
+          "note": "posiekana"
+        },
+        {
+          "id": "87c7b09e-0ee0-4725-ad96-a06e64f82e5a",
+          "raw": "1 tbsp plain whole-milk yogurt",
+          "name": "jogurt naturalny",
+          "quantity": 15,
+          "unit": "ml",
+          "note": "pełnotłusty"
+        },
+        {
+          "id": "42dbd280-72a8-4619-8cf2-43fd7053b07c",
+          "raw": "1 tsp ground coriander (or coriander powder)",
+          "name": "kolendra mielona",
+          "quantity": 5,
+          "unit": "ml",
+          "note": "proszek"
+        },
+        {
+          "id": "671ae051-425f-4119-98d2-f9f8ed2ed102",
+          "raw": "3/4 tsp mild red chili powder, or to taste",
+          "name": "papryka chili w proszku",
+          "quantity": 4,
+          "unit": "ml",
+          "note": "łagodna"
+        },
+        {
+          "id": "98b7f16a-8add-42e5-9cbd-252b2ca6e4a9",
+          "raw": "1/2 tsp turmeric powder",
+          "name": "kurkuma",
+          "quantity": 3,
+          "unit": "ml",
+          "note": "proszek"
+        },
+        {
+          "id": "76282e0a-a3b4-47b1-8662-2f5cd333cb5d",
+          "raw": "1 1/8 tsp kosher salt, or to taste",
+          "name": "sól",
+          "quantity": 6,
+          "unit": "ml",
+          "note": "do smaku"
+        },
+        {
+          "id": "85fda2aa-f6f0-4f8b-9e95-e11d6a4a947a",
+          "raw": "1 cup (~130 g) frozen green peas, thawed",
+          "name": "groszek zielony",
+          "quantity": 130,
+          "unit": "g",
+          "note": "mrożony, rozmrożony"
+        },
+        {
+          "id": "c155a0f2-f3ca-4867-84f2-d7954efb6f4e",
+          "raw": "1 tsp freshly ground black pepper",
+          "name": "pieprz czarny",
+          "quantity": 5,
+          "unit": "ml",
+          "note": "świeżo mielony"
+        },
+        {
+          "id": "e047a534-02eb-4c16-bd93-f2dd3eedd67e",
+          "raw": "1/4-1/2 tsp garam masala",
+          "name": "garam masala",
+          "quantity": 2,
+          "unit": "ml",
+          "note": "przyprawa"
+        },
+        {
+          "id": "0ae751d3-1450-4e22-a612-e89a0ae5fc15",
+          "raw": "1/4 cup cilantro leaves, chopped",
+          "name": "kolendra świeża",
+          "quantity": 60,
+          "unit": "ml",
+          "note": "posiekane liście"
+        },
+        {
+          "id": "4f4c37d4-9cef-46c6-8b29-1ba54d113b55",
+          "raw": "1/2 tsp fresh lemon or lime juice",
+          "name": "sok z cytryny",
+          "quantity": 3,
+          "unit": "ml",
+          "note": "świeżo wyciśnięty"
+        }
+      ],
+      "steps": [
+        {
+          "id": "4b094906-f348-40ec-ba8b-37c3d5b40fa2",
+          "text": "Rozgrzej olej na patelni na dużym ogniu. Dodaj ziarna kminu i cebulę, smaż do uzyskania złotobrązowego koloru.",
+          "durationMinutes": 8
+        },
+        {
+          "id": "e3a5cf9b-0448-4c82-bfe8-142783a08178",
+          "text": "Dodaj czosnek i imbir, smaż przez minutę. Dodaj mieloną wołowinę i smaż, często mieszając, aż mięso przestanie być różowe i odparuje wilgoć.",
+          "durationMinutes": 6
+        },
+        {
+          "id": "db0ffc0f-1073-42e7-a73e-7e123295882c",
+          "text": "Dodaj pomidora, zielone chili, jogurt, kolendrę, chili w proszku, kurkumę i sól. Smaż przez 2 minuty, aż pomidory zmiękną. Dolej 60 ml wody i doprowadź do wrzenia.",
+          "durationMinutes": 2
+        },
+        {
+          "id": "f3bf06b7-6879-4ded-977f-b1477ec1affc",
+          "text": "Zmniejsz ogień na średni, przykryj i gotuj przez 15 minut, mieszając w międzyczasie. W razie potrzeby dolej kolejne 60 ml wody, jeśli mięso zacznie przywierać.",
+          "durationMinutes": 15
+        },
+        {
+          "id": "c522fa95-b7eb-4632-9677-824804bf7f33",
+          "text": "Odkryj patelnię, dodaj groszek i 125 ml wody. Przykryj ponownie i gotuj, aż groszek będzie miękki.",
+          "durationMinutes": 4
+        },
+        {
+          "id": "83ab6911-46cc-4b63-a177-74709b68ce69",
+          "text": "Dodaj czarny pieprz, garam masalę i kolendrę. Smaż jeszcze przez chwilę, aż olej zacznie oddzielać się od sosu. Zmniejsz ogień na minimum, przykryj i pozwól smakom się przegryźć.",
+          "durationMinutes": 7
+        },
+        {
+          "id": "02c8da26-b6be-4968-8382-932ea6ab4131",
+          "text": "Wyłącz ogień, posyp świeżą kolendrą i skrop sokiem z cytryny. Podawaj na gorąco.",
+          "durationMinutes": 0
+        }
+      ],
+      "warnings": [
+        "Przepis został w całości odczytany ze strony internetowej. Ilości zostały przeliczone na system metryczny zgodnie z instrukcją."
+      ],
+      "source": "https://www.teaforturmeric.com/keema-matar/",
+      "sourceType": "url",
+      "createdAt": "2026-10-06T13:35:10.655Z",
+      "updatedAt": "2026-10-06T13:35:10.655Z"
+    },
     {
       "id": "4dbf1042-380d-4a0e-bca9-99e30409d2cf",
       "title": "Czosnkowe curry",
