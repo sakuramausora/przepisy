@@ -1,7 +1,214 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-08T10:39:48.085Z",
+  "updatedAt": "2026-10-17T10:58:51.818Z",
   "recipes": [
+    {
+      "id": "dc94a58c-1679-4688-84e0-3852e3e29788",
+      "title": "Butter Chicken (Murgh Makhani)",
+      "description": "Klasyczne indyjskie danie składające się z marynowanego i grillowanego kurczaka w kremowym, maślanym sosie pomidorowym.",
+      "servings": 4,
+      "prepMinutes": 25,
+      "cookMinutes": 30,
+      "totalMinutes": 775,
+      "tags": [
+        "kurczak",
+        "kuchnia indyjska",
+        "obiad",
+        "kremowe"
+      ],
+      "ingredients": [
+        {
+          "id": "3e865b75-afe7-4d93-926e-3e2e320fb1c6",
+          "raw": "500 g boneless chicken",
+          "name": "kurczak",
+          "quantity": 500,
+          "unit": "g",
+          "note": "bez kości, pokrojony w kawałki"
+        },
+        {
+          "id": "57045040-136a-426a-ad04-b3e02934fc64",
+          "raw": "15 ml lemon juice",
+          "name": "sok z cytryny",
+          "quantity": 15,
+          "unit": "ml",
+          "note": "do marynaty"
+        },
+        {
+          "id": "054c7b1d-b8bf-4125-8d10-b1a6874e6a42",
+          "raw": "3 g salt",
+          "name": "sól",
+          "quantity": 3,
+          "unit": "g",
+          "note": "do smaku"
+        },
+        {
+          "id": "494b39c9-1815-4516-82b2-1e5f1e7622c3",
+          "raw": "5 g Kashmiri red chili powder",
+          "name": "przyprawa chili",
+          "quantity": 5,
+          "unit": "g",
+          "note": "lub papryka"
+        },
+        {
+          "id": "f2646e87-499e-4462-ac55-aab5d928f6da",
+          "raw": "80 ml Greek yogurt",
+          "name": "jogurt grecki",
+          "quantity": 80,
+          "unit": "ml",
+          "note": "gęsty"
+        },
+        {
+          "id": "2eca0702-500a-4a10-96b0-4ec3e6708ca1",
+          "raw": "11 g ginger garlic paste",
+          "name": "pasta imbirowo-czosnkowa",
+          "quantity": 11,
+          "unit": "g",
+          "note": "lub starty imbir i czosnek"
+        },
+        {
+          "id": "87a55205-1283-4b3e-aa37-6828cfdce577",
+          "raw": "1 g turmeric",
+          "name": "kurkuma",
+          "quantity": 1,
+          "unit": "g",
+          "note": "opcjonalnie"
+        },
+        {
+          "id": "6148fa7f-e370-4af4-b981-8c130610205b",
+          "raw": "5 g garam masala",
+          "name": "garam masala",
+          "quantity": 5,
+          "unit": "g",
+          "note": "do marynaty"
+        },
+        {
+          "id": "ee724ad3-60b2-4682-99d6-7592d8aab9d4",
+          "raw": "2 g cumin powder",
+          "name": "kmin rzymski",
+          "quantity": 2,
+          "unit": "g",
+          "note": "opcjonalnie"
+        },
+        {
+          "id": "f783b294-2e3f-4a34-a476-581210bc9a44",
+          "raw": "5 g coriander powder",
+          "name": "kolendra mielona",
+          "quantity": 5,
+          "unit": "g",
+          "note": "opcjonalnie"
+        },
+        {
+          "id": "26288d45-b710-4609-afb7-13f0ef9b8677",
+          "raw": "5 g kasuri methi",
+          "name": "kozieradka",
+          "quantity": 5,
+          "unit": "g",
+          "note": "suszone liście"
+        },
+        {
+          "id": "e4041f76-7db5-489f-a195-87f892a4343b",
+          "raw": "15 ml oil",
+          "name": "olej",
+          "quantity": 15,
+          "unit": "ml",
+          "note": "do marynaty"
+        },
+        {
+          "id": "c410a367-a266-4e31-97ce-d9d5f4e37c1b",
+          "raw": "45 g butter",
+          "name": "masło",
+          "quantity": 45,
+          "unit": "g",
+          "note": "do sosu"
+        },
+        {
+          "id": "3e2f0059-692d-428a-8eb1-360bc8d85589",
+          "raw": "130 g onions",
+          "name": "cebula",
+          "quantity": 130,
+          "unit": "g",
+          "note": "opcjonalnie, pokrojona"
+        },
+        {
+          "id": "dc6674f9-d98c-4902-96dc-be53e62b118a",
+          "raw": "600 g tomatoes",
+          "name": "pomidor",
+          "quantity": 600,
+          "unit": "g",
+          "note": "świeże lub passata"
+        },
+        {
+          "id": "02698b0e-a402-4de9-8dcd-2d447e61b9dc",
+          "raw": "42 g cashews",
+          "name": "nerkowiec",
+          "quantity": 42,
+          "unit": "g",
+          "note": "namoczone"
+        },
+        {
+          "id": "f010d69d-7420-44c3-a857-b576b7b6d076",
+          "raw": "80 ml heavy cream",
+          "name": "śmietanka",
+          "quantity": 80,
+          "unit": "ml",
+          "note": "30% lub więcej"
+        },
+        {
+          "id": "9a79c28e-1ac8-41c8-be58-265231c840ce",
+          "raw": "5 g sugar",
+          "name": "cukier",
+          "quantity": 5,
+          "unit": "g",
+          "note": "do smaku"
+        }
+      ],
+      "steps": [
+        {
+          "id": "0b1fba64-4f6a-4f92-a551-fd5b7dd43961",
+          "text": "Kurczaka wymieszaj z sokiem z cytryny, chili i solą, odstaw na 20 minut.",
+          "durationMinutes": 20
+        },
+        {
+          "id": "d1099212-c727-4ef8-ba37-426a895c1a73",
+          "text": "Dodaj jogurt, pastę imbirowo-czosnkową, przyprawy i olej. Marynuj w lodówce minimum 30 minut, najlepiej 12 godzin.",
+          "durationMinutes": 720
+        },
+        {
+          "id": "31768fea-4492-465f-9156-8492ce14a6fd",
+          "text": "Podsmaż cebulę na oleju, a następnie zblenduj ją z pomidorami i nerkowcami na gładką masę.",
+          "durationMinutes": 10
+        },
+        {
+          "id": "b4124caf-038a-46ae-b025-f5eba2dc52bd",
+          "text": "Na patelni rozpuść masło, dodaj przyprawy korzenne i pastę imbirowo-czosnkową, smaż przez 2 minuty.",
+          "durationMinutes": 2
+        },
+        {
+          "id": "eb1b6e95-d8ce-4495-92fb-5d1ff0e066bb",
+          "text": "Wlej masę pomidorową, gotuj aż sos zgęstnieje, następnie dodaj wodę i gotuj kolejne 10 minut.",
+          "durationMinutes": 25
+        },
+        {
+          "id": "c7abf98a-3483-4555-8d2e-70761a214d8c",
+          "text": "Kurczaka grilluj na patelni do zarumienienia.",
+          "durationMinutes": 10
+        },
+        {
+          "id": "63b2a05c-0381-49ec-b93a-e8d5d29988d9",
+          "text": "Dodaj kurczaka do sosu, gotuj 7 minut, na koniec dodaj śmietankę, cukier i kozieradkę.",
+          "durationMinutes": 7
+        }
+      ],
+      "warnings": [
+        "Przepis został w pełni odczytany ze strony internetowej. Ilości zostały przeliczone na system metryczny zgodnie z instrukcją (np. 1 szklanka = 250 ml).",
+        "Czas marynowania jest kluczowy dla kruchości mięsa.",
+        "Uważaj przy gotowaniu sosu, może pryskać."
+      ],
+      "source": "https://www.indianhealthyrecipes.com/butter-chicken/",
+      "sourceType": "url",
+      "createdAt": "2026-10-17T10:58:47.815Z",
+      "updatedAt": "2026-10-17T10:58:47.815Z"
+    },
     {
       "id": "f3fcf90c-b213-4cbc-98da-a7bf0975f51d",
       "title": "Keema Matar (Curry z mielonej wołowiny z groszkiem)",
