@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-05T11:25:27.240Z",
+  "updatedAt": "2026-11-05T14:00:26.558Z",
   "recipes": [
     {
       "id": "c2635745-06f1-4513-9a80-6fc16fbd6451",
@@ -1022,22 +1022,38 @@
       "name": "kolendra mielona",
       "unit": "łyżeczka",
       "quantity": 0.5,
-      "checked": false,
+      "checked": true,
       "fromRecipes": [
         "c2635745-06f1-4513-9a80-6fc16fbd6451"
       ],
       "manual": false
     },
     {
-      "id": "965ac06b-d29f-4031-8ba4-37ff5dd35b1e",
-      "name": "koper włoski mielony",
-      "unit": "łyżeczka",
-      "quantity": 0.25,
+      "id": "522633f7-8ca9-4a66-9619-7e40ca55e02c",
+      "name": "Woda",
+      "unit": "",
+      "quantity": 0,
       "checked": false,
-      "fromRecipes": [
-        "c2635745-06f1-4513-9a80-6fc16fbd6451"
-      ],
-      "manual": false
+      "fromRecipes": [],
+      "manual": true
+    },
+    {
+      "id": "d53a82b8-c4b7-4cf4-a08b-4c9596e7125d",
+      "name": "Sok",
+      "unit": "",
+      "quantity": 0,
+      "checked": false,
+      "fromRecipes": [],
+      "manual": true
+    },
+    {
+      "id": "a111720e-f6f0-4892-9705-4901e9034778",
+      "name": "Mleko",
+      "unit": "",
+      "quantity": 0,
+      "checked": false,
+      "fromRecipes": [],
+      "manual": true
     }
   ]
 }
