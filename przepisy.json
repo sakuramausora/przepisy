@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-05T11:00:53.262Z",
+  "updatedAt": "2026-11-05T11:25:27.240Z",
   "recipes": [
     {
       "id": "c2635745-06f1-4513-9a80-6fc16fbd6451",
@@ -961,5 +961,83 @@
       "updatedAt": "2026-10-03T22:51:33.841Z"
     }
   ],
-  "shopping": []
+  "shopping": [
+    {
+      "id": "0fe754db-d386-401d-af01-3b14405c1e0d",
+      "name": "imbir",
+      "unit": "g",
+      "quantity": 5,
+      "checked": false,
+      "fromRecipes": [
+        "c2635745-06f1-4513-9a80-6fc16fbd6451"
+      ],
+      "manual": false
+    },
+    {
+      "id": "f138ff00-85f0-462a-a26e-070d2c7863e5",
+      "name": "czosnek",
+      "unit": "szt",
+      "quantity": 2,
+      "checked": false,
+      "fromRecipes": [
+        "c2635745-06f1-4513-9a80-6fc16fbd6451"
+      ],
+      "manual": false
+    },
+    {
+      "id": "0da54a3d-80f5-4d45-871e-13bc9f8b4b5b",
+      "name": "cebula żółta",
+      "unit": "g",
+      "quantity": 125,
+      "checked": false,
+      "fromRecipes": [
+        "c2635745-06f1-4513-9a80-6fc16fbd6451"
+      ],
+      "manual": false
+    },
+    {
+      "id": "d7d0e00c-a996-426e-b994-bbc4d9583685",
+      "name": "masło",
+      "unit": "g",
+      "quantity": 15,
+      "checked": false,
+      "fromRecipes": [
+        "c2635745-06f1-4513-9a80-6fc16fbd6451"
+      ],
+      "manual": false
+    },
+    {
+      "id": "b258bf1a-abcd-4e5a-af96-ec38ea1f619e",
+      "name": "zielony groszek",
+      "unit": "g",
+      "quantity": 90,
+      "checked": false,
+      "fromRecipes": [
+        "c2635745-06f1-4513-9a80-6fc16fbd6451"
+      ],
+      "manual": false
+    },
+    {
+      "id": "ad3f83c0-05e8-4ea2-9718-fb31b492b2f4",
+      "name": "kolendra mielona",
+      "unit": "łyżeczka",
+      "quantity": 0.5,
+      "checked": false,
+      "fromRecipes": [
+        "c2635745-06f1-4513-9a80-6fc16fbd6451"
+      ],
+      "manual": false
+    },
+    {
+      "id": "965ac06b-d29f-4031-8ba4-37ff5dd35b1e",
+      "name": "koper włoski mielony",
+      "unit": "łyżeczka",
+      "quantity": 0.25,
+      "checked": false,
+      "fromRecipes": [
+        "c2635745-06f1-4513-9a80-6fc16fbd6451"
+      ],
+      "manual": false
+    }
+  ]
 }
