@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-05T14:08:15.876Z",
+  "updatedAt": "2026-11-05T14:10:25.070Z",
   "recipes": [
     {
       "id": "c2635745-06f1-4513-9a80-6fc16fbd6451",
@@ -1011,7 +1011,7 @@
       "name": "zielony groszek",
       "unit": "g",
       "quantity": 90,
-      "checked": false,
+      "checked": true,
       "fromRecipes": [
         "c2635745-06f1-4513-9a80-6fc16fbd6451"
       ],
