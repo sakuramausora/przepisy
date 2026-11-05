@@ -1,7 +1,230 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-17T11:59:44.201Z",
+  "updatedAt": "2026-11-05T11:00:53.262Z",
   "recipes": [
+    {
+      "id": "c2635745-06f1-4513-9a80-6fc16fbd6451",
+      "title": "Methi Matar Malai",
+      "description": "Kremowe indyjskie danie z liści kozieradki (methi) i zielonego groszku (matar) w aromatycznym sosie na bazie cebuli i nerkowców.",
+      "servings": 2,
+      "prepMinutes": 20,
+      "cookMinutes": 25,
+      "totalMinutes": 45,
+      "tags": [
+        "wegetariańskie",
+        "kuchnia indyjska",
+        "kremowe",
+        "bezglutenowe"
+      ],
+      "ingredients": [
+        {
+          "id": "11fdf44d-22ca-4028-9966-2f27fb441764",
+          "raw": "1 tablespoon oil",
+          "name": "olej",
+          "quantity": 15,
+          "unit": "ml",
+          "note": "do smażenia bazy"
+        },
+        {
+          "id": "580ac78c-fdcc-49f1-99e3-90bbe8f0395c",
+          "raw": "½ teaspoon cumin seeds",
+          "name": "kmin rzymski",
+          "quantity": 0.5,
+          "unit": "łyżeczka",
+          "note": "nasiona"
+        },
+        {
+          "id": "f8a76a56-5d4c-4904-a7e3-905a3eea4c2b",
+          "raw": "2 small (or 1 large) green cardamoms",
+          "name": "kardamon zielony",
+          "quantity": 2,
+          "unit": "szt",
+          "note": "małe"
+        },
+        {
+          "id": "daff35e2-f2f1-47fc-9976-bc51292ff0b7",
+          "raw": "⅛ to ¼ teaspoon black pepper corn",
+          "name": "pieprz czarny",
+          "quantity": 0.25,
+          "unit": "łyżeczka",
+          "note": "ziarna"
+        },
+        {
+          "id": "b54aae00-6e47-432c-8d7b-424dfd52e19c",
+          "raw": "¾ inch cinnamon piece",
+          "name": "cynamon",
+          "quantity": 1,
+          "unit": "szt",
+          "note": "kawałek ok. 2 cm"
+        },
+        {
+          "id": "33cb480b-d505-4470-916b-aaff47b13878",
+          "raw": "2 cloves",
+          "name": "goździki",
+          "quantity": 2,
+          "unit": "szt",
+          "note": "opcjonalnie"
+        },
+        {
+          "id": "f9a89878-1a5f-4a8c-bab8-85314a69d7e2",
+          "raw": "⅓ inch ginger sliced",
+          "name": "imbir",
+          "quantity": 5,
+          "unit": "g",
+          "note": "świeży, pokrojony"
+        },
+        {
+          "id": "b36f5bf2-27c6-4077-9741-0b25d3165421",
+          "raw": "2 large garlic cloves sliced",
+          "name": "czosnek",
+          "quantity": 2,
+          "unit": "szt",
+          "note": "duże ząbki"
+        },
+        {
+          "id": "52729979-a3a5-4e4c-838a-aec88f1f955c",
+          "raw": "1 green chili",
+          "name": "zielona papryczka chili",
+          "quantity": 1,
+          "unit": "szt",
+          "note": "posiekana"
+        },
+        {
+          "id": "fe6d508d-cbcb-4649-8cc1-8cd24f11bfe4",
+          "raw": "1 cup yellow onion sliced",
+          "name": "cebula żółta",
+          "quantity": 125,
+          "unit": "g",
+          "note": "pokrojona"
+        },
+        {
+          "id": "d9424ca5-6e48-48ac-a405-56f4a94ab2bd",
+          "raw": "15 cashew nuts",
+          "name": "orzechy nerkowca",
+          "quantity": 30,
+          "unit": "g",
+          "note": "całe"
+        },
+        {
+          "id": "0a288d40-5a30-44f4-9c26-16df294784bd",
+          "raw": "½ cup water",
+          "name": "woda",
+          "quantity": 120,
+          "unit": "ml",
+          "note": "do gotowania cebuli"
+        },
+        {
+          "id": "04fd406f-245a-4ea1-8e1e-52e4a0888382",
+          "raw": "1 tablespoon butter",
+          "name": "masło",
+          "quantity": 15,
+          "unit": "g",
+          "note": "niesolone"
+        },
+        {
+          "id": "52f737fd-65af-4b17-872d-bda06588b662",
+          "raw": "2 to 2½ cups methi leaves",
+          "name": "liście kozieradki",
+          "quantity": 50,
+          "unit": "g",
+          "note": "świeże, posiekane"
+        },
+        {
+          "id": "8f498d0c-9ee0-418f-a142-8bf33e2ee52f",
+          "raw": "½ cup green peas",
+          "name": "zielony groszek",
+          "quantity": 90,
+          "unit": "g",
+          "note": "mrożony lub świeży"
+        },
+        {
+          "id": "de514e74-d040-41bd-88ab-951bd65351b3",
+          "raw": "⅓ teaspoon sea salt",
+          "name": "sól morska",
+          "quantity": 0.33,
+          "unit": "łyżeczka",
+          "note": "do smaku"
+        },
+        {
+          "id": "d5523dd3-20dd-4dd3-92ca-838e67600cc5",
+          "raw": "½ teaspoon coriander powder",
+          "name": "kolendra mielona",
+          "quantity": 0.5,
+          "unit": "łyżeczka",
+          "note": "przyprawa"
+        },
+        {
+          "id": "c818aac8-e19f-4aab-908f-201e7c8e036b",
+          "raw": "¼ teaspoon fennel powder",
+          "name": "koper włoski mielony",
+          "quantity": 0.25,
+          "unit": "łyżeczka",
+          "note": "opcjonalnie"
+        },
+        {
+          "id": "ea007197-715f-4140-bd67-30b8dbbef1ec",
+          "raw": "⅓ to ½ teaspoon Garam masala",
+          "name": "garam masala",
+          "quantity": 0.5,
+          "unit": "łyżeczka",
+          "note": "przyprawa"
+        },
+        {
+          "id": "b60772a5-b999-411d-a914-6c4306e7af71",
+          "raw": "2 to 3 tablespoons heavy cream",
+          "name": "śmietanka 30%",
+          "quantity": 45,
+          "unit": "ml",
+          "note": "tłusta"
+        }
+      ],
+      "steps": [
+        {
+          "id": "19ac288a-1b6c-4459-a7e8-f96ecbb0321b",
+          "text": "Rozgrzej olej na patelni, dodaj kmin, cynamon, kardamon, pieprz i goździki. Gdy zaczną skwierczeć, dodaj imbir, czosnek, cebulę i chili. Smaż przez 6 minut, aż cebula stanie się przezroczysta.",
+          "durationMinutes": 6
+        },
+        {
+          "id": "283cc6e4-5342-4a26-b91c-b2ab5ad02f95",
+          "text": "Dodaj orzechy nerkowca i wodę. Przykryj i gotuj przez 5-6 minut, aż składniki zmiękną.",
+          "durationMinutes": 6
+        },
+        {
+          "id": "0acdc827-04ff-40be-8f4e-2f1cfb846b73",
+          "text": "Ostudź mieszankę, usuń chili (opcjonalnie) i zblenduj całość na gładką masę.",
+          "durationMinutes": 5
+        },
+        {
+          "id": "84ed9f98-8d2e-45d4-adcd-48ffb12744f4",
+          "text": "Na tej samej patelni rozpuść masło, dodaj liście kozieradki i smaż przez 4-5 minut, aż zwiędną.",
+          "durationMinutes": 5
+        },
+        {
+          "id": "86534750-1511-40c0-9914-6d10b5321e8c",
+          "text": "Dodaj garam masalę, kolendrę, koper włoski, sól oraz zielony groszek. Smaż przez 2 minuty.",
+          "durationMinutes": 2
+        },
+        {
+          "id": "09e353da-7865-4480-813f-f118bba40a4e",
+          "text": "Wlej przygotowane puree z cebuli i nerkowców oraz dodatkową wodę. Wymieszaj, doprowadź do wrzenia, przykryj i gotuj na średnim ogniu przez 5 minut, aż sos zgęstnieje.",
+          "durationMinutes": 5
+        },
+        {
+          "id": "3e221668-381a-4aed-8d6a-3c7147487f95",
+          "text": "Na koniec wmieszaj śmietankę i zdejmij z ognia.",
+          "durationMinutes": 1
+        }
+      ],
+      "warnings": [
+        "Przepis został w pełni odczytany ze strony internetowej.",
+        "Uważaj przy smażeniu przypraw w gorącym oleju, mogą pryskać.",
+        "Jeśli liście kozieradki są bardzo gorzkie, można dodać pół łyżeczki cukru."
+      ],
+      "source": "https://www.indianhealthyrecipes.com/methi-matar-malai/",
+      "sourceType": "url",
+      "createdAt": "2026-11-05T11:00:49.254Z",
+      "updatedAt": "2026-11-05T11:00:49.254Z"
+    },
     {
       "id": "dc94a58c-1679-4688-84e0-3852e3e29788",
       "title": "Butter Chicken (Murgh Makhani)",
